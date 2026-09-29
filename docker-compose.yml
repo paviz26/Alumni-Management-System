@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: alumni_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alumni_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - alumni_pgdata:/var/lib/postgresql/data
+
+volumes:
+  alumni_pgdata:
