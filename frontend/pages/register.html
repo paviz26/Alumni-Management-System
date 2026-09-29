@@ -3,14 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alumni Registration | Alumni Management</title>
+  <title>Register | Alumni Connect</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <header><h1>Alumni Registration</h1></header>
-  <main class="hero">
-    <h2>Alumni Registration</h2>
-    <p>Frontend implementation for the Alumni Management System.</p>
+  <header class="auth-header">
+    <h1>ALUMNI CONNECT</h1>
+  </header>
+
+  <main class="auth-container">
+    <h2 class="auth-title">Create Account</h2>
+    
+    <div id="error-message" class="error-message" style="display: none;"></div>
+    <div id="success-message" class="success-message" style="display: none;"></div>
+
+    <form id="register-form">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input 
+          type="text" 
+          id="firstName" 
+          name="firstName" 
+          placeholder="Enter your first name"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input 
+          type="text" 
+          id="lastName" 
+          name="lastName" 
+          placeholder="Enter your last name"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="Enter your email"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="Create a password"
+          required
+          minlength="6"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          name="confirmPassword" 
+          placeholder="Confirm your password"
+          required
+          minlength="6"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role" name="role" required>
+          <option value="">Select your role</option>
+          <option value="STUDENT">Student</option>
+          <option value="ALUMNI">Alumni</option>
+          <option value="FACULTY">Faculty</option>
+        </select>
+      </div>
+
+      <!-- Department field (common for all roles) -->
+      <div class="form-group">
+        <label for="department">Department</label>
+        <select id="department" name="department" required>
+          <option value="">Select department</option>
+          <option value="CSE">Computer Science & Engineering</option>
+          <option value="ECE">Electronics & Communication</option>
+          <option value="EEE">Electrical & Electronics</option>
+          <option value="MECH">Mechanical Engineering</option>
+          <option value="CIVIL">Civil Engineering</option>
+          <option value="IT">Information Technology</option>
+          <option value="AI">Artificial Intelligence</option>
+          <option value="DATA">Data Science</option>
+        </select>
+      </div>
+
+      <!-- Student-specific fields -->
+      <div id="student-fields" style="display: none;">
+        <div class="form-group">
+          <label for="registrationNumber">Registration Number</label>
+          <input 
+            type="text" 
+            id="registrationNumber" 
+            name="registrationNumber" 
+            placeholder="Enter your registration number"
+          >
+        </div>
+      </div>
+
+      <!-- Alumni-specific fields -->
+      <div id="alumni-fields" style="display: none;">
+        <div class="form-group">
+          <label for="graduationYear">Graduation Year</label>
+          <input 
+            type="number" 
+            id="graduationYear" 
+            name="graduationYear" 
+            placeholder="Enter graduation year"
+            min="1950"
+            max="2100"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="company">Company</label>
+          <input 
+            type="text" 
+            id="company" 
+            name="company" 
+            placeholder="Current company"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="jobTitle">Job Title</label>
+          <input 
+            type="text" 
+            id="jobTitle" 
+            name="jobTitle" 
+            placeholder="Current job title"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input 
+            type="text" 
+            id="location" 
+            name="location" 
+            placeholder="Current location"
+          >
+        </div>
+      </div>
+
+      <!-- Faculty-specific fields -->
+      <div id="faculty-fields" style="display: none;">
+        <div class="form-group">
+          <label for="designation">Designation</label>
+          <select id="designation" name="designation">
+            <option value="">Select designation</option>
+            <option value="Professor">Professor</option>
+            <option value="Associate Professor">Associate Professor</option>
+            <option value="Assistant Professor">Assistant Professor</option>
+            <option value="Lecturer">Lecturer</option>
+            <option value="HOD">Head of Department</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success btn-block" id="register-btn">
+        Create Account
+      </button>
+    </form>
+
+    <div class="auth-links">
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
   </main>
+
+  <script src="../js/register.js"></script>
 </body>
 </html>

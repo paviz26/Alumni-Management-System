@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Dashboard | Alumni Connect</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>FACULTY DASHBOARD</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="faculty-dashboard.html" class="active">My Profile</a></li>
+        <li><a href="directory.html">Alumni Directory</a></li>
+        <li><a href="students.html">Students</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="mentorship.html">Mentorship Support</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Faculty Dashboard</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">F</div>
+          <span id="user-name">Faculty Name</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-grid">
+        <!-- Profile Summary -->
+        <div class="card profile-card" style="grid-column: span 2;">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">F</div>
+            <div class="profile-info">
+              <h2 id="profile-name">Dr. Faculty Name</h2>
+              <p class="profile-title" id="profile-designation">Professor</p>
+              <p class="profile-title" id="profile-department">Department</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
+          </div>
+        </div>
+
+        <!-- Department Stats -->
+        <div class="card stat-card">
+          <div class="stat-number" id="students-count">0</div>
+          <div class="stat-label">Students</div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-number" id="alumni-count">0</div>
+          <div class="stat-label">Alumni</div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>Quick Actions</h3>
+          <div class="profile-actions">
+            <button class="btn btn-primary" onclick="createEvent()">Create Event</button>
+            <button class="btn btn-success" onclick="createAnnouncement()">Create Announcement</button>
+            <button class="btn btn-secondary" onclick="viewMentorship()">View Mentorship Programs</button>
+          </div>
+        </div>
+
+        <!-- Recent Events -->
+        <div class="card">
+          <h3>Recent Events</h3>
+          <div id="recent-events">
+            <p>No recent events.</p>
+          </div>
+        </div>
+
+        <!-- Recent Announcements -->
+        <div class="card">
+          <h3>Recent Announcements</h3>
+          <div id="recent-announcements">
+            <p>No recent announcements.</p>
+          </div>
+        </div>
+
+        <!-- Department Students -->
+        <div class="card">
+          <h3>Department Students</h3>
+          <div id="department-students">
+            <p>Loading students...</p>
+          </div>
+        </div>
+
+        <!-- Department Alumni -->
+        <div class="card">
+          <h3>Department Alumni</h3>
+          <div id="department-alumni">
+            <p>Loading alumni...</p>
+          </div>
+        </div>
+
+        <!-- Mentorship Overview -->
+        <div class="card">
+          <h3>Mentorship Overview</h3>
+          <div id="mentorship-overview">
+            <p>Loading mentorship data...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/faculty-dashboard.js"></script>
+</body>
+</html>

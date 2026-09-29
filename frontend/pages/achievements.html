@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Achievements | Alumni Connect</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI DASHBOARD</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="alumni-dashboard.html">My Profile</a></li>
+        <li><a href="directory.html">Alumni Directory</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="achievements.html" class="active">Achievements</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Post Opportunities</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Achievements</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <span id="user-name">Alumni Name</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Achievements Content -->
+      <div class="dashboard-grid">
+        <!-- Add Achievement -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>Add Achievement</h3>
+          <form id="add-achievement-form">
+            <div class="form-group">
+              <label for="achievement-title">Achievement Title</label>
+              <input type="text" id="achievement-title" name="title" required placeholder="e.g., AI Innovation Award">
+            </div>
+
+            <div class="form-group">
+              <label for="achievement-description">Description</label>
+              <textarea id="achievement-description" name="description" rows="3" placeholder="Describe your achievement..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="achievement-date">Achievement Date</label>
+              <input type="date" id="achievement-date" name="achievementDate" required>
+            </div>
+
+            <button type="submit" class="btn btn-success">Add Achievement</button>
+          </form>
+        </div>
+
+        <!-- My Achievements -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>My Achievements</h3>
+          <div id="my-achievements">
+            <p>No achievements added yet. Start showcasing your accomplishments!</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/achievements.js"></script>
+</body>
+</html>

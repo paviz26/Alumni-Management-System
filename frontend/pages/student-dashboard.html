@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | Alumni Connect</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI CONNECT</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="student-dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="profile.html">My Profile</a></li>
+        <li><a href="directory.html">Alumni Directory</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Career Opportunities</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Welcome, <span id="user-name">Student</span>!</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">S</div>
+          <span id="user-email">student@example.com</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-grid">
+        <!-- Welcome Section -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>Quick Actions</h3>
+          <div class="search-bar">
+            <input type="text" id="quick-search" placeholder="Search alumni...">
+            <button onclick="window.location.href='directory.html'">Search Alumni</button>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card">
+          <h3>Notifications</h3>
+          <div id="notifications-list">
+            <div class="notification-item">
+              <p>Welcome to Alumni Connect! Start connecting with alumni.</p>
+              <span class="notification-time">Just now</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggested Alumni -->
+        <div class="card">
+          <h3>Suggested Alumni</h3>
+          <div id="suggested-alumni">
+            <div class="list-item">
+              <div class="list-item-info">
+                <h4>Rahul Sharma</h4>
+                <p>Software Engineer @ Microsoft</p>
+                <p>CSE • 2022</p>
+              </div>
+              <div class="list-item-actions">
+                <button class="btn btn-primary" onclick="connectWithAlumni(1)">Connect</button>
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="list-item-info">
+                <h4>Ananya Rao</h4>
+                <p>Data Scientist @ AWS</p>
+                <p>AI • 2021</p>
+              </div>
+              <div class="list-item-actions">
+                <button class="btn btn-primary" onclick="connectWithAlumni(2)">Connect</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="card">
+          <h3>Upcoming Events</h3>
+          <div id="upcoming-events">
+            <div class="list-item">
+              <div class="list-item-info">
+                <h4>Alumni Career Talk</h4>
+                <p>15 Oct • 4:00 PM • Seminar Hall</p>
+                <p>Type: Career Talk</p>
+              </div>
+              <div class="list-item-actions">
+                <button class="btn btn-primary" onclick="registerForEvent(1)">Register</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Career Opportunities -->
+        <div class="card">
+          <h3>Career Opportunities</h3>
+          <div id="career-opportunities">
+            <div class="list-item">
+              <div class="list-item-info">
+                <h4>ML Intern</h4>
+                <p>XYZ Technologies • Bengaluru</p>
+                <p>Deadline: 20 Oct</p>
+              </div>
+              <div class="list-item-actions">
+                <button class="btn btn-primary" onclick="applyForJob(1)">Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mentorship Status -->
+        <div class="card">
+          <h3>Mentorship Status</h3>
+          <div id="mentorship-status">
+            <p>No active mentorship requests.</p>
+            <button class="btn btn-primary" onclick="window.location.href='mentorship.html'">Find a Mentor</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/student-dashboard.js"></script>
+</body>
+</html>
