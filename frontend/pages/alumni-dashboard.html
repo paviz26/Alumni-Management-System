@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alumni Dashboard | Alumni Connect</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI DASHBOARD</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="alumni-dashboard.html" class="active">My Profile</a></li>
+        <li><a href="directory.html">Alumni Directory</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="achievements.html">Achievements</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Post Opportunities</a></li>
+        <li><a href="announcements.html">Announcements</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Alumni Dashboard</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <span id="user-name">Alumni Name</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-grid">
+        <!-- Profile Summary -->
+        <div class="card profile-card" style="grid-column: span 2;">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">A</div>
+            <div class="profile-info">
+              <h2 id="profile-name">Alumni Name <span class="verified-badge" id="verified-badge" style="display: none;">✓ Verified</span></h2>
+              <p class="profile-title" id="profile-title">Software Engineer @ Company</p>
+              <p class="profile-title" id="profile-dept">Department • Graduation Year</p>
+              <p class="profile-title" id="profile-location">Location</p>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
+            <button class="btn btn-success" onclick="window.location.href='achievements.html'">Add Achievement</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="card stat-card">
+          <div class="stat-number" id="connections-count">0</div>
+          <div class="stat-label">Connections</div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-number" id="mentorship-count">0</div>
+          <div class="stat-label">Mentorship Requests</div>
+        </div>
+
+        <!-- Mentorship Requests -->
+        <div class="card">
+          <h3>Mentorship Requests</h3>
+          <div id="mentorship-requests">
+            <p>No pending mentorship requests.</p>
+          </div>
+        </div>
+
+        <!-- Connection Requests -->
+        <div class="card">
+          <h3>Connection Requests</h3>
+          <div id="connection-requests">
+            <p>No pending connection requests.</p>
+          </div>
+        </div>
+
+        <!-- Recent Achievements -->
+        <div class="card">
+          <h3>Recent Achievements</h3>
+          <div id="recent-achievements">
+            <p>No achievements added yet.</p>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="card">
+          <h3>Upcoming Events</h3>
+          <div id="upcoming-events">
+            <p>No upcoming events.</p>
+          </div>
+        </div>
+
+        <!-- My Posted Jobs -->
+        <div class="card">
+          <h3>My Posted Opportunities</h3>
+          <div id="my-jobs">
+            <p>No opportunities posted yet.</p>
+            <button class="btn btn-primary" onclick="window.location.href='jobs.html'">Post Opportunity</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/alumni-dashboard.js"></script>
+</body>
+</html>

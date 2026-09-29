@@ -3,14 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alumni Directory | Alumni Management</title>
+  <title>Find Alumni | Alumni Connect</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <header><h1>Alumni Directory</h1></header>
-  <main class="hero">
-    <h2>Alumni Directory</h2>
-    <p>Frontend implementation for the Alumni Management System.</p>
-  </main>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI CONNECT</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="goToDashboard()">Dashboard</a></li>
+        <li><a href="directory.html" class="active">Find Alumni</a></li>
+        <li><a href="profile.html">My Profile</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Career Opportunities</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Find Alumni</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name">User</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Search Section -->
+      <div class="card">
+        <h3>Search Alumni</h3>
+        
+        <div class="search-bar">
+          <input type="text" id="search-keyword" placeholder="Search by name, company, or skills...">
+          <select id="filter-department">
+            <option value="">All Departments</option>
+            <option value="CSE">Computer Science & Engineering</option>
+            <option value="ECE">Electronics & Communication</option>
+            <option value="EEE">Electrical & Electronics</option>
+            <option value="MECH">Mechanical Engineering</option>
+            <option value="CIVIL">Civil Engineering</option>
+            <option value="IT">Information Technology</option>
+            <option value="AI">Artificial Intelligence</option>
+            <option value="DATA">Data Science</option>
+          </select>
+          
+          <select id="filter-year">
+            <option value="">All Years</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option value="2018">2018</option>
+            <option value="2017">2017</option>
+            <option value="2016">2016</option>
+            <option value="2015">2015</option>
+          </select>
+          
+          <select id="filter-field">
+            <option value="">All Fields</option>
+            <option value="Software Engineering">Software Engineering</option>
+            <option value="Data Science">Data Science</option>
+            <option value="AI/ML">AI/ML</option>
+            <option value="Product Management">Product Management</option>
+            <option value="Consulting">Consulting</option>
+            <option value="Finance">Finance</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Research">Research</option>
+          </select>
+          
+          <input type="text" id="filter-company" placeholder="Company name...">
+          
+          <select id="filter-location">
+            <option value="">All Locations</option>
+            <option value="Bengaluru">Bengaluru</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Chennai">Chennai</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Pune">Pune</option>
+            <option value="International">International</option>
+          </select>
+          
+          <button onclick="searchAlumni()">Search</button>
+          <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="card">
+        <div class="top-bar" style="margin-bottom: 20px;">
+          <h3>Search Results</h3>
+          <div class="user-info">
+            <span id="results-count">0 alumni found</span>
+          </div>
+        </div>
+        
+        <div id="alumni-results">
+          <p style="text-align: center; color: #6b7280;">Use the search filters above to find alumni</p>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination" style="display: none; margin-top: 20px; text-align: center;">
+          <button class="btn btn-secondary" onclick="previousPage()" id="prev-btn" disabled>Previous</button>
+          <span id="page-info" style="margin: 0 15px;">Page 1 of 1</span>
+          <button class="btn btn-secondary" onclick="nextPage()" id="next-btn" disabled>Next</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/directory.js"></script>
 </body>
 </html>

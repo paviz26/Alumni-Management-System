@@ -3,14 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jobs & Internships | Alumni Management</title>
+  <title>Career Opportunities | Alumni Connect</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <header><h1>Jobs & Internships</h1></header>
-  <main class="hero">
-    <h2>Jobs & Internships</h2>
-    <p>Frontend implementation for the Alumni Management System.</p>
-  </main>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI CONNECT</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="goToDashboard()">Dashboard</a></li>
+        <li><a href="directory.html">Find Alumni</a></li>
+        <li><a href="profile.html">My Profile</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html" class="active">Career Opportunities</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Career Opportunities</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name">User</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Jobs Content -->
+      <div class="dashboard-grid">
+        <!-- Post Job (for alumni) -->
+        <div class="card" style="grid-column: span 2;" id="post-job-card" style="display: none;">
+          <h3>Post Career Opportunity</h3>
+          <form id="post-job-form">
+            <div class="form-group">
+              <label for="job-title">Job Title</label>
+              <input type="text" id="job-title" name="title" required>
+            </div>
+
+            <div class="form-group">
+              <label for="job-description">Description</label>
+              <textarea id="job-description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="job-company">Company</label>
+              <input type="text" id="job-company" name="company" required>
+            </div>
+
+            <div class="form-group">
+              <label for="job-location">Location</label>
+              <input type="text" id="job-location" name="location">
+            </div>
+
+            <div class="form-group">
+              <label for="job-type">Employment Type</label>
+              <select id="job-type" name="employmentType">
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Internship">Internship</option>
+                <option value="Contract">Contract</option>
+                <option value="Remote">Remote</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="job-deadline">Application Deadline</label>
+              <input type="date" id="job-deadline" name="deadline">
+            </div>
+
+            <div class="form-group">
+              <label for="job-url">Application URL</label>
+              <input type="url" id="job-url" name="applicationUrl" placeholder="https://...">
+            </div>
+
+            <button type="submit" class="btn btn-success">Post Opportunity</button>
+          </form>
+        </div>
+
+        <!-- Available Jobs -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>Available Opportunities</h3>
+          <div id="available-jobs">
+            <p>No career opportunities available.</p>
+          </div>
+        </div>
+
+        <!-- My Applications -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>My Applications</h3>
+          <div id="my-applications">
+            <p>No job applications submitted yet.</p>
+          </div>
+        </div>
+
+        <!-- My Posted Jobs (for alumni) -->
+        <div class="card" style="grid-column: span 2;" id="my-posted-jobs-card" style="display: none;">
+          <h3>My Posted Opportunities</h3>
+          <div id="my-posted-jobs">
+            <p>No opportunities posted yet.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/jobs.js"></script>
 </body>
 </html>

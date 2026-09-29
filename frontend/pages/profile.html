@@ -3,14 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Profile | Alumni Management</title>
+  <title>Alumni Profile | Alumni Connect</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <header><h1>My Profile</h1></header>
-  <main class="hero">
-    <h2>My Profile</h2>
-    <p>Frontend implementation for the Alumni Management System.</p>
-  </main>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI CONNECT</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="goToDashboard()">Dashboard</a></li>
+        <li><a href="directory.html">Find Alumni</a></li>
+        <li><a href="profile.html" class="active">My Profile</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Career Opportunities</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Alumni Profile</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name">User</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Profile Content -->
+      <div id="profile-content">
+        <!-- View Mode -->
+        <div id="view-mode">
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="profile-avatar" id="profile-avatar">A</div>
+              <div class="profile-info">
+                <h2 id="profile-name">Alumni Name <span class="verified-badge" id="verified-badge" style="display: none;">✓ Verified Alumni</span></h2>
+                <p class="profile-title" id="profile-title">Software Engineer @ Company</p>
+                <p class="profile-title" id="profile-dept-year">Department • Class of Year</p>
+                <p class="profile-title" id="profile-location">Location</p>
+              </div>
+            </div>
+
+            <div class="profile-section">
+              <h4>About</h4>
+              <p id="profile-bio">Bio information about the alumni...</p>
+            </div>
+
+            <div class="profile-section">
+              <h4>Professional Information</h4>
+              <p><strong>Company:</strong> <span id="profile-company">Company Name</span></p>
+              <p><strong>Job Title:</strong> <span id="profile-job-title">Job Title</span></p>
+              <p><strong>Department:</strong> <span id="profile-department">Department</span></p>
+              <p><strong>Graduation Year:</strong> <span id="profile-grad-year">Year</span></p>
+            </div>
+
+            <div class="profile-section">
+              <h4>Contact Information</h4>
+              <p><strong>Email:</strong> <span id="profile-email">email@example.com</span></p>
+              <p><strong>Phone:</strong> <span id="profile-phone">Phone Number</span></p>
+              <p><strong>LinkedIn:</strong> <a href="#" id="profile-linkedin" target="_blank">LinkedIn Profile</a></p>
+              <p><strong>GitHub:</strong> <a href="#" id="profile-github" target="_blank">GitHub Profile</a></p>
+            </div>
+
+            <div class="profile-section">
+              <h4>Achievements</h4>
+              <div id="profile-achievements">
+                <p>No achievements added yet.</p>
+              </div>
+            </div>
+
+            <div class="profile-actions" id="profile-actions">
+              <button class="btn btn-primary" onclick="enableEditMode()">Edit Profile</button>
+              <button class="btn btn-success" onclick="window.location.href='achievements.html'">Add Achievement</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="edit-mode" style="display: none;">
+          <div class="card">
+            <h3>Edit Profile</h3>
+            
+            <form id="edit-profile-form">
+              <div class="form-group">
+                <label for="edit-first-name">First Name</label>
+                <input type="text" id="edit-first-name" name="firstName" required>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-last-name">Last Name</label>
+                <input type="text" id="edit-last-name" name="lastName" required>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-phone">Phone</label>
+                <input type="text" id="edit-phone" name="phone">
+              </div>
+
+              <div class="form-group">
+                <label for="edit-company">Company</label>
+                <input type="text" id="edit-company" name="company">
+              </div>
+
+              <div class="form-group">
+                <label for="edit-job-title">Job Title</label>
+                <input type="text" id="edit-job-title" name="jobTitle">
+              </div>
+
+              <div class="form-group">
+                <label for="edit-location">Location</label>
+                <input type="text" id="edit-location" name="location">
+              </div>
+
+              <div class="form-group">
+                <label for="edit-bio">Bio</label>
+                <textarea id="edit-bio" name="bio" rows="4"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="edit-linkedin">LinkedIn URL</label>
+                <input type="url" id="edit-linkedin" name="linkedinUrl">
+              </div>
+
+              <div class="form-group">
+                <label for="edit-github">GitHub URL</label>
+                <input type="url" id="edit-github" name="githubUrl">
+              </div>
+
+              <div class="profile-actions">
+                <button type="submit" class="btn btn-success">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/profile.js"></script>
 </body>
 </html>

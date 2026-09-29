@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications | Alumni Connect</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI CONNECT</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="goToDashboard()">Dashboard</a></li>
+        <li><a href="directory.html">Find Alumni</a></li>
+        <li><a href="profile.html">My Profile</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html">Mentorship</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Career Opportunities</a></li>
+        <li><a href="notifications.html" class="active">Notifications</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Notifications</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name">User</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Notifications Content -->
+      <div class="card">
+        <div class="top-bar" style="margin-bottom: 20px;">
+          <h3>All Notifications</h3>
+          <div class="user-info">
+            <button class="btn btn-primary" onclick="markAllAsRead()">Mark All as Read</button>
+          </div>
+        </div>
+        
+        <div id="notifications-list">
+          <p style="text-align: center; color: #6b7280;">Loading notifications...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/notifications.js"></script>
+</body>
+</html>

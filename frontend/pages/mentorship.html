@@ -3,14 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mentorship | Alumni Management</title>
+  <title>Mentorship | Alumni Connect</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <header><h1>Mentorship</h1></header>
-  <main class="hero">
-    <h2>Mentorship</h2>
-    <p>Frontend implementation for the Alumni Management System.</p>
-  </main>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ALUMNI CONNECT</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="goToDashboard()">Dashboard</a></li>
+        <li><a href="directory.html">Find Alumni</a></li>
+        <li><a href="profile.html">My Profile</a></li>
+        <li><a href="connections.html">Connections</a></li>
+        <li><a href="mentorship.html" class="active">Mentorship</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="jobs.html">Career Opportunities</a></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="user-info">
+          <h1>Mentorship</h1>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name">User</span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- Mentorship Content -->
+      <div class="dashboard-grid">
+        <!-- Request Mentorship -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>Request Mentorship</h3>
+          <div id="mentorship-request-form">
+            <div class="form-group">
+              <label for="mentor-select">Select Alumni Mentor</label>
+              <select id="mentor-select" name="mentorId">
+                <option value="">Select an alumni to mentor you</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="area-of-interest">Area of Interest</label>
+              <select id="area-of-interest" name="areaOfInterest">
+                <option value="">Select area of interest</option>
+                <option value="Software Engineering">Software Engineering</option>
+                <option value="Data Science">Data Science</option>
+                <option value="AI/ML">AI/ML</option>
+                <option value="Product Management">Product Management</option>
+                <option value="Consulting">Consulting</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Research">Research</option>
+                <option value="Entrepreneurship">Entrepreneurship</option>
+                <option value="Career Guidance">Career Guidance</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="mentorship-message">Message</label>
+              <textarea id="mentorship-message" name="message" rows="4" placeholder="Explain why you'd like mentorship and what you hope to learn..."></textarea>
+            </div>
+
+            <button class="btn btn-success" onclick="sendMentorshipRequest()">Send Request</button>
+          </div>
+        </div>
+
+        <!-- My Mentorship Requests -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>My Mentorship Requests</h3>
+          <div id="my-mentorship-requests">
+            <p>No mentorship requests sent yet.</p>
+          </div>
+        </div>
+
+        <!-- Active Mentorships -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>Active Mentorships</h3>
+          <div id="active-mentorships">
+            <p>No active mentorships.</p>
+          </div>
+        </div>
+
+        <!-- Mentorship Requests (for alumni) -->
+        <div class="card" style="grid-column: span 2;" id="mentor-requests-card" style="display: none;">
+          <h3>Mentorship Requests</h3>
+          <div id="mentor-requests">
+            <p>No mentorship requests received.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/mentorship.js"></script>
 </body>
 </html>
