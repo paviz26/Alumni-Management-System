@@ -62,7 +62,8 @@ async function loadNotifications() {
     const response = await authenticatedFetch(`${API_BASE_URL}/notifications`);
     
     if (response && response.ok) {
-      const notifications = await response.json();
+      const payload = await response.json();
+      const notifications = Array.isArray(payload) ? payload : payload.notifications || [];
       renderNotifications(notifications);
     }
   } catch (error) {
@@ -83,7 +84,7 @@ function renderNotifications(notifications) {
   notificationsList.innerHTML = notifications.map(notification => `
     <div class="notification-item ${notification.read ? '' : 'unread'}">
       <p>${notification.message}</p>
-      <span class="notification-time">${formatDate(notification.created_at)}</span>
+      <span class="notification-time">${formatDate(notification.createdAt || notification.created_at)}</span>
     </div>
   `).join('');
 }
@@ -93,7 +94,8 @@ async function loadSuggestedAlumni() {
     const response = await authenticatedFetch(`${API_BASE_URL}/alumni/suggested`);
     
     if (response && response.ok) {
-      const alumni = await response.json();
+      const payload = await response.json();
+      const alumni = Array.isArray(payload) ? payload : payload.alumni || [];
       renderSuggestedAlumni(alumni);
     }
   } catch (error) {
@@ -114,12 +116,12 @@ function renderSuggestedAlumni(alumni) {
   suggestedAlumniContainer.innerHTML = alumni.map(alum => `
     <div class="list-item">
       <div class="list-item-info">
-        <h4>${alum.first_name} ${alum.last_name}</h4>
-        <p>${alum.designation || 'Alumni'} @ ${alum.company_name || 'Company'}</p>
-        <p>${alum.department_code || 'Department'} • ${alum.graduation_year || 'Year'}</p>
+        <h4>${alum.firstName || alum.first_name || ''} ${alum.lastName || alum.last_name || ''}</h4>
+        <p>${alum.designation || 'Alumni'} @ ${alum.companyName || alum.company_name || 'Company'}</p>
+        <p>${alum.departmentCode || alum.department_code || 'Department'} • ${alum.graduationYear || alum.graduation_year || 'Year'}</p>
       </div>
       <div class="list-item-actions">
-        <button class="btn btn-primary" onclick="connectWithAlumni(${alum.alumni_id})">Connect</button>
+        <button class="btn btn-primary" onclick="connectWithAlumni(${alum.alumniId || alum.alumni_id})">Connect</button>
       </div>
     </div>
   `).join('');
@@ -130,7 +132,8 @@ async function loadUpcomingEvents() {
     const response = await authenticatedFetch(`${API_BASE_URL}/events/upcoming`);
     
     if (response && response.ok) {
-      const events = await response.json();
+      const payload = await response.json();
+      const events = Array.isArray(payload) ? payload : payload.events || [];
       renderUpcomingEvents(events);
     }
   } catch (error) {
@@ -152,11 +155,11 @@ function renderUpcomingEvents(events) {
     <div class="list-item">
       <div class="list-item-info">
         <h4>${event.title}</h4>
-        <p>${formatDate(event.event_date)} • ${event.venue || 'TBD'}</p>
+        <p>${formatDate(event.eventDate || event.event_date)} • ${event.venue || 'TBD'}</p>
         <p>Type: ${event.type || 'General'}</p>
       </div>
       <div class="list-item-actions">
-        <button class="btn btn-primary" onclick="registerForEvent(${event.event_id})">Register</button>
+        <button class="btn btn-primary" onclick="registerForEvent(${event.eventId || event.event_id})">Register</button>
       </div>
     </div>
   `).join('');
@@ -167,7 +170,8 @@ async function loadCareerOpportunities() {
     const response = await authenticatedFetch(`${API_BASE_URL}/jobs/recent`);
     
     if (response && response.ok) {
-      const jobs = await response.json();
+      const payload = await response.json();
+      const jobs = Array.isArray(payload) ? payload : payload.jobs || [];
       renderCareerOpportunities(jobs);
     }
   } catch (error) {
@@ -189,11 +193,11 @@ function renderCareerOpportunities(jobs) {
     <div class="list-item">
       <div class="list-item-info">
         <h4>${job.title}</h4>
-        <p>${job.company_name || 'Company'} • ${job.location || 'Location'}</p>
+        <p>${job.companyName || job.company_name || 'Company'} • ${job.location || 'Location'}</p>
         <p>Deadline: ${formatDate(job.deadline)}</p>
       </div>
       <div class="list-item-actions">
-        <button class="btn btn-primary" onclick="applyForJob(${job.job_id})">Apply</button>
+        <button class="btn btn-primary" onclick="applyForJob(${job.jobId || job.job_id})">Apply</button>
       </div>
     </div>
   `).join('');
@@ -204,7 +208,8 @@ async function loadMentorshipStatus() {
     const response = await authenticatedFetch(`${API_BASE_URL}/mentorship/my-requests`);
     
     if (response && response.ok) {
-      const mentorships = await response.json();
+      const payload = await response.json();
+      const mentorships = Array.isArray(payload) ? payload : payload.requests || [];
       renderMentorshipStatus(mentorships);
     }
   } catch (error) {
@@ -230,9 +235,9 @@ function renderMentorshipStatus(mentorships) {
   mentorshipContainer.innerHTML = activeRequests.map(mentorship => `
     <div class="list-item">
       <div class="list-item-info">
-        <h4>${mentorship.mentor_name}</h4>
+        <h4>${mentorship.mentorName || mentorship.mentor_name || 'Mentor'}</h4>
         <p>Status: ${mentorship.status}</p>
-        <p>Area: ${mentorship.area_of_interest || 'General'}</p>
+        <p>Area: ${mentorship.areaOfInterest || mentorship.area_of_interest || 'General'}</p>
       </div>
       <div class="list-item-actions">
         <span class="badge ${mentorship.status.toLowerCase()}">${mentorship.status}</span>

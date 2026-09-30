@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api";
+window.API_BASE_URL = "http://localhost:5000/api";
 
 // Store authentication token and user data
 let authToken = localStorage.getItem('authToken');
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Check if user is already logged in
-  if (authToken && currentUser) {
+  if (loginForm && authToken && currentUser) {
     redirectBasedOnRole(currentUser.role);
   }
 });
