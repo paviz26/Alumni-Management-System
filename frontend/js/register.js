@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const studentFields = document.getElementById('student-fields');
   const alumniFields = document.getElementById('alumni-fields');
   const facultyFields = document.getElementById('faculty-fields');
+  const registrationNumber = document.getElementById('registrationNumber');
+  const graduationYear = document.getElementById('graduationYear');
+  const company = document.getElementById('company');
+  const jobTitle = document.getElementById('jobTitle');
+  const designation = document.getElementById('designation');
   const registerForm = document.getElementById('register-form');
   const registerBtn = document.getElementById('register-btn');
 
@@ -16,33 +21,34 @@ document.addEventListener('DOMContentLoaded', function() {
     studentFields.style.display = 'none';
     alumniFields.style.display = 'none';
     facultyFields.style.display = 'none';
+    registrationNumber.required = false;
+    graduationYear.required = false;
+    company.required = false;
+    jobTitle.required = false;
+    designation.required = false;
 
     // Show relevant fields based on role
     switch(role) {
       case 'STUDENT':
         studentFields.style.display = 'block';
         // Make student fields required
-        document.getElementById('registrationNumber').required = true;
+        registrationNumber.required = true;
         break;
       case 'ALUMNI':
         alumniFields.style.display = 'block';
         // Make alumni fields required
-        document.getElementById('graduationYear').required = true;
-        document.getElementById('company').required = true;
-        document.getElementById('jobTitle').required = true;
+        graduationYear.required = true;
+        company.required = true;
+        jobTitle.required = true;
         break;
       case 'FACULTY':
         facultyFields.style.display = 'block';
         // Make faculty fields required
-        document.getElementById('designation').required = true;
+        designation.required = true;
         break;
       default:
         // Remove required attributes when no role selected
-        document.getElementById('registrationNumber').required = false;
-        document.getElementById('graduationYear').required = false;
-        document.getElementById('company').required = false;
-        document.getElementById('jobTitle').required = false;
-        document.getElementById('designation').required = false;
+        break;
     }
   });
 
@@ -121,7 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
 
       } else {
-        showError(data.message || 'Registration failed. Please try again.');
+        const errorMessage = data.message || data.detail?.message || data.detail || 'Registration failed. Please try again.';
+        showError(typeof errorMessage === 'string' ? errorMessage : 'Registration failed. Please try again.');
         registerBtn.disabled = false;
         registerBtn.textContent = 'Create Account';
       }
