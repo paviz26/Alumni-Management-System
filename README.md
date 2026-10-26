@@ -9,7 +9,7 @@ events, networking, mentorship, career opportunities, and donations.
 - Pavithra — PostgreSQL Database Design
 
 ## Technology Stack
-- Frontend: HTML/CSS/JavaScript (can be migrated to React)
+- Frontend: React + Vite
 - Backend: Node.js + Express.js
 - Database: PostgreSQL
 - API: REST
@@ -34,8 +34,10 @@ events, networking, mentorship, career opportunities, and donations.
 2. Run `database/01_schema.sql`.
 3. Run `database/02_sample_data.sql`.
 4. Configure `backend/.env` using `backend/.env.example`.
-5. Install backend dependencies with `npm install`.
-6. Start the server with `npm run dev`.
-7. Open the frontend using the configured development server.
+5. Install backend dependencies with `cd backend && npm install`.
+6. Start the backend server with `cd backend && npm run dev`.
+7. Install frontend dependencies with `cd frontend && npm install`.
+8. Start the frontend development server with `cd frontend && npm run dev`.
+9. Open `http://localhost:3000` in your browser.
 
 See `docs/setup.md` for detailed instructions.
