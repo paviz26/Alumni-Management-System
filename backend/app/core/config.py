@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
-    cors_allowed_origins: str = "http://localhost:5000,http://127.0.0.1:5000,http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000,http://127.0.0.1:8000"
+    cors_allowed_origins: str = "null,http://localhost:5000,http://127.0.0.1:5000,http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000,http://127.0.0.1:8000"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -18,7 +18,9 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
+        origins = [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
+        # Pages opened directly from disk send the opaque "null" origin.
+        return list(dict.fromkeys([*origins, "null"]))
 
 
 @lru_cache

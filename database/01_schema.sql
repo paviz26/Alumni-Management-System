@@ -22,13 +22,9 @@ CREATE TABLE departments (
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
-
     email VARCHAR(150) NOT NULL UNIQUE,
-
     password_hash TEXT NOT NULL,
-
     role VARCHAR(20) NOT NULL DEFAULT 'ALUMNI',
-
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_user_role
@@ -42,15 +38,10 @@ CREATE TABLE users (
 
 CREATE TABLE companies (
     company_id SERIAL PRIMARY KEY,
-
     company_name VARCHAR(150) NOT NULL UNIQUE,
-
     industry VARCHAR(100),
-
     location VARCHAR(100),
-
     website_url TEXT,
-
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -61,33 +52,19 @@ CREATE TABLE companies (
 
 CREATE TABLE alumni (
     alumni_id SERIAL PRIMARY KEY,
-
     user_id INT NOT NULL UNIQUE,
-
     department_id INT,
-
     company_id INT,
-
     first_name VARCHAR(50) NOT NULL,
-
     last_name VARCHAR(50),
-
     phone VARCHAR(20),
-
     graduation_year INT NOT NULL,
-
     designation VARCHAR(100),
-
     location VARCHAR(100),
-
     bio TEXT,
-
     linkedin_url TEXT,
-
     github_url TEXT,
-
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
 
     -- One alumni profile belongs to one user
     CONSTRAINT fk_alumni_user
@@ -95,20 +72,17 @@ CREATE TABLE alumni (
         REFERENCES users(user_id)
         ON DELETE CASCADE,
 
-
     -- Alumni belongs to a department
     CONSTRAINT fk_alumni_department
         FOREIGN KEY (department_id)
         REFERENCES departments(department_id)
         ON DELETE SET NULL,
 
-
     -- Current company of alumni
     CONSTRAINT fk_alumni_company
         FOREIGN KEY (company_id)
         REFERENCES companies(company_id)
         ON DELETE SET NULL,
-
 
     -- Basic validation
     CONSTRAINT chk_graduation_year
@@ -122,27 +96,18 @@ CREATE TABLE alumni (
 
 CREATE TABLE events (
     event_id SERIAL PRIMARY KEY,
-
     title VARCHAR(200) NOT NULL,
-
     description TEXT,
-
     event_date TIMESTAMP NOT NULL,
-
     venue VARCHAR(200),
-
     capacity INT,
-
     created_by INT,
-
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
 
     CONSTRAINT fk_event_creator
         FOREIGN KEY (created_by)
         REFERENCES users(user_id)
         ON DELETE SET NULL,
-
 
     CONSTRAINT chk_event_capacity
         CHECK (capacity IS NULL OR capacity > 0)
@@ -198,25 +163,15 @@ CREATE TABLE event_registrations (
 
 CREATE TABLE jobs (
     job_id SERIAL PRIMARY KEY,
-
     company_id INT,
-
     posted_by INT,
-
     title VARCHAR(200) NOT NULL,
-
     description TEXT,
-
     location VARCHAR(100),
-
     employment_type VARCHAR(30),
-
     application_url TEXT,
-
     deadline DATE,
-
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
 
     CONSTRAINT fk_job_company
         FOREIGN KEY (company_id)
