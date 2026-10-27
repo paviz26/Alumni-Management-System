@@ -8,13 +8,14 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
 from app.db.database import get_db
-from app.db.models import Achievement, Alumni, Company, Connection, Department, Student, User
-from app.schemas import AchievementCreate
+from app.db.models import Achievement, Alumni, Company, Connection, Department, Mentorship, Student, User
+from app.schemas import AchievementCreate, ProfileUpdate
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/alumni", tags=["Alumni"])
+router = APIRouter(prefix="/alumni", tags=["Alumni"], route_class=CompatibleAPIRoute)
 
 
-def serialize_alumni_row(db: Session, alumni: Alumni) -> dict:
+def serialize_alumni_row(db: Session, alumni: Alumni, include_email: bool = False, include_private: bool = False) -> dict:
     user = db.query(User).filter(User.user_id == alumni.user_id).first()
     department = db.query(Department).filter(Department.department_id == alumni.department_id).first() if alumni.department_id else None
     company_name = alumni.current_company or (db.query(Company).filter(Company.company_id == alumni.company_id).first().company_name if alumni.company_id else None)
@@ -24,8 +25,6 @@ def serialize_alumni_row(db: Session, alumni: Alumni) -> dict:
         "user_id": alumni.user_id,
         "first_name": alumni.first_name or (user.first_name if user else ""),
         "last_name": alumni.last_name or (user.last_name if user else ""),
-        "email": user.email if user else None,
-        "phone": alumni.phone,
         "department_code": department.department_code if department else None,
         "department_name": department.department_name if department else None,
         "graduation_year": alumni.graduation_year,
@@ -38,6 +37,10 @@ def serialize_alumni_row(db: Session, alumni: Alumni) -> dict:
         "verified": verified,
         "verification_status": alumni.verification_status or ("VERIFIED" if verified else "PENDING"),
     }
+    if include_email:
+        payload["email"] = user.email if user else None
+    if include_private:
+        payload["phone"] = alumni.phone
     return payload
 
 
@@ -115,8 +118,9 @@ def alumni_stats(db: Session = Depends(get_db), current_user: User = Depends(get
     alumni = db.query(Alumni).filter(Alumni.user_id == current_user.user_id).first()
     if not alumni:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alumni profile not found")
-    connections_count = db.query(Connection).filter((Connection.sender_id == current_user.user_id) | (Connection.receiver_id == current_user.user_id)).count()
-    return {"connections": connections_count, "mentorshipRequests": 0, "alumniId": alumni.alumni_id}
+    connections_count = db.query(Connection).filter(Connection.status == "ACCEPTED", ((Connection.sender_id == current_user.user_id) | (Connection.receiver_id == current_user.user_id))).count()
+    mentorship_requests = db.query(Mentorship).filter(Mentorship.alumni_id == alumni.alumni_id, Mentorship.status == "PENDING").count()
+    return {"connections": connections_count, "mentorshipRequests": mentorship_requests, "alumniId": alumni.alumni_id}
 
 
 @router.get("/achievements")
@@ -161,7 +165,7 @@ def update_achievement(achievement_id: int, payload: AchievementCreate, db: Sess
     if not achievement:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Achievement not found")
     alumni = db.query(Alumni).filter(Alumni.user_id == current_user.user_id).first()
-    if current_user.role != "ADMIN" and not alumni or (alumni and achievement.alumni_id != alumni.alumni_id):
+    if current_user.role != "ADMIN" and (not alumni or achievement.alumni_id != alumni.alumni_id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this achievement")
     achievement.title = payload.title.strip()
     achievement.description = payload.description.strip() if payload.description else None
@@ -188,7 +192,7 @@ def get_my_profile(db: Session = Depends(get_db), current_user: User = Depends(g
     alumni = db.query(Alumni).filter(Alumni.user_id == current_user.user_id).first()
     if not alumni:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
-    payload = serialize_alumni_row(db, alumni)
+    payload = serialize_alumni_row(db, alumni, include_email=True, include_private=True)
     payload["achievements"] = [{
         "achievement_id": a.achievement_id,
         "title": a.title,
@@ -199,22 +203,23 @@ def get_my_profile(db: Session = Depends(get_db), current_user: User = Depends(g
 
 
 @router.put("/me")
-def update_my_profile(payload: dict, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_my_profile(payload: ProfileUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     alumni = db.query(Alumni).filter(Alumni.user_id == current_user.user_id).first()
     if not alumni:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
 
-    if payload.get("firstName") is not None:
-        alumni.first_name = payload["firstName"]; current_user.first_name = payload["firstName"]
-    if payload.get("lastName") is not None:
-        alumni.last_name = payload["lastName"]; current_user.last_name = payload["lastName"]
-    if payload.get("phone") is not None: alumni.phone = payload["phone"]
-    if payload.get("company") is not None: alumni.current_company = payload["company"]
-    if payload.get("jobTitle") is not None: alumni.designation = payload["jobTitle"]
-    if payload.get("location") is not None: alumni.location = payload["location"]
-    if payload.get("bio") is not None: alumni.bio = payload["bio"]
-    if payload.get("linkedinUrl") is not None: alumni.linkedin_url = payload["linkedinUrl"]
-    if payload.get("githubUrl") is not None: alumni.github_url = payload["githubUrl"]
+    values = payload.model_dump(exclude_unset=True)
+    if "firstName" in values:
+        alumni.first_name = current_user.first_name = values["firstName"].strip()
+    if "lastName" in values:
+        alumni.last_name = current_user.last_name = values["lastName"].strip()
+    if "phone" in values: alumni.phone = values["phone"]
+    if "company" in values: alumni.current_company = values["company"]
+    if "jobTitle" in values: alumni.designation = values["jobTitle"]
+    if "location" in values: alumni.location = values["location"]
+    if "bio" in values: alumni.bio = values["bio"]
+    if "linkedinUrl" in values: alumni.linkedin_url = values["linkedinUrl"]
+    if "githubUrl" in values: alumni.github_url = values["githubUrl"]
     db.commit()
     return {"success": True, "message": "Profile updated successfully", "alumni": serialize_alumni_row(db, alumni)}
 

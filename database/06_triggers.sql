@@ -57,7 +57,13 @@ BEGIN
     SELECT capacity
     INTO event_capacity
     FROM events
-    WHERE event_id = NEW.event_id;
+    WHERE event_id = NEW.event_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Event % does not exist', NEW.event_id
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
 
     -- If the event has no capacity limit, allow registration
     IF event_capacity IS NULL THEN

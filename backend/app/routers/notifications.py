@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_user
 from app.db.database import get_db
 from app.db.models import Notification, User
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/notifications", tags=["Notifications"])
+router = APIRouter(prefix="/notifications", tags=["Notifications"], route_class=CompatibleAPIRoute)
 
 
 @router.get("")

@@ -11,7 +11,7 @@
 CREATE TABLE departments (
     department_id SERIAL PRIMARY KEY,
     department_name VARCHAR(100) NOT NULL UNIQUE,
-    department_code VARCHAR(20) NOT NULL UNIQUE
+    department_code VARCHAR(20) UNIQUE
 );
 
 
@@ -25,10 +25,28 @@ CREATE TABLE users (
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'ALUMNI',
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_user_role
         CHECK (role IN ('ADMIN', 'ALUMNI', 'STUDENT','FACULTY'))
+);
+
+CREATE TABLE students (
+    student_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+    department_id INT REFERENCES departments(department_id) ON DELETE SET NULL,
+    registration_number VARCHAR(50) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE faculty (
+    faculty_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+    department_id INT REFERENCES departments(department_id) ON DELETE SET NULL,
+    designation VARCHAR(150),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -55,15 +73,19 @@ CREATE TABLE alumni (
     user_id INT NOT NULL UNIQUE,
     department_id INT,
     company_id INT,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50),
+    current_company VARCHAR(150),
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
     phone VARCHAR(20),
-    graduation_year INT NOT NULL,
+    graduation_year INT,
     designation VARCHAR(100),
     location VARCHAR(100),
     bio TEXT,
     linkedin_url TEXT,
     github_url TEXT,
+    verification_status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (verification_status IN ('PENDING', 'VERIFIED', 'REJECTED')),
+    verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     -- One alumni profile belongs to one user
@@ -101,6 +123,8 @@ CREATE TABLE events (
     event_date TIMESTAMP NOT NULL,
     venue VARCHAR(200),
     capacity INT,
+    type VARCHAR(50) NOT NULL DEFAULT 'GENERAL',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'CANCELLED')),
     created_by INT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -163,8 +187,9 @@ CREATE TABLE event_registrations (
 
 CREATE TABLE jobs (
     job_id SERIAL PRIMARY KEY,
-    company_id INT,
+    company_id INT REFERENCES companies(company_id) ON DELETE SET NULL,
     posted_by INT,
+    company VARCHAR(200),
     title VARCHAR(200) NOT NULL,
     description TEXT,
     location VARCHAR(100),
@@ -172,12 +197,6 @@ CREATE TABLE jobs (
     application_url TEXT,
     deadline DATE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_job_company
-        FOREIGN KEY (company_id)
-        REFERENCES companies(company_id)
-        ON DELETE SET NULL,
-
 
     CONSTRAINT fk_job_poster
         FOREIGN KEY (posted_by)
@@ -188,40 +207,34 @@ CREATE TABLE jobs (
 
 -- ============================================================
 -- 8. JOB APPLICATIONS
--- Many-to-many relationship:
--- Alumni <-> Jobs
+-- Students may apply once to each job.
 -- ============================================================
-
-
+CREATE TABLE job_applications (
+    application_id SERIAL PRIMARY KEY,
+    job_id INT NOT NULL REFERENCES jobs(job_id) ON DELETE CASCADE,
+    student_id INT NOT NULL REFERENCES students(student_id) ON DELETE CASCADE,
+    applied_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'REVIEWING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN')),
+    CONSTRAINT uq_job_applications_job_student UNIQUE (job_id, student_id)
+);
 
 
 -- ============================================================
 -- 9. MENTORSHIP
--- Alumni can mentor other alumni
+-- Students request mentorship from alumni.
 -- ============================================================
 
 CREATE TABLE mentorship (
     mentorship_id SERIAL PRIMARY KEY,
 
-    mentor_id INT NOT NULL,
-
-    mentee_id INT NOT NULL,
-
-    requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    student_id INT NOT NULL REFERENCES students(student_id) ON DELETE CASCADE,
+    alumni_id INT NOT NULL REFERENCES alumni(alumni_id) ON DELETE CASCADE,
+    area_of_interest VARCHAR(100),
+    message TEXT,
+    requested_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-
-
-    CONSTRAINT fk_mentor
-        FOREIGN KEY (mentor_id)
-        REFERENCES alumni(alumni_id)
-        ON DELETE CASCADE,
-
-
-    CONSTRAINT fk_mentee
-        FOREIGN KEY (mentee_id)
-        REFERENCES alumni(alumni_id)
-        ON DELETE CASCADE,
 
 
     CONSTRAINT chk_mentorship_status
@@ -231,9 +244,8 @@ CREATE TABLE mentorship (
         ),
 
 
-    -- Someone cannot mentor themselves
-    CONSTRAINT chk_different_mentor_mentee
-        CHECK (mentor_id <> mentee_id)
+    CONSTRAINT uq_mentorship_student_alumni
+        UNIQUE (student_id, alumni_id)
 );
 
 
@@ -251,12 +263,55 @@ CREATE TABLE announcements (
     created_by INT,
 
     published_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED'
+        CHECK (status IN ('DRAFT', 'PUBLISHED', 'ARCHIVED')),
 
 
     CONSTRAINT fk_announcement_creator
         FOREIGN KEY (created_by)
         REFERENCES users(user_id)
         ON DELETE SET NULL
+);
+
+CREATE TABLE connections (
+    connection_id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    receiver_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED')),
+    requested_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accepted_on TIMESTAMP,
+    CONSTRAINT uq_connections_direction UNIQUE (sender_id, receiver_id),
+    CONSTRAINT ck_connections_not_self CHECK (sender_id <> receiver_id)
+);
+
+CREATE TABLE achievements (
+    achievement_id SERIAL PRIMARY KEY,
+    alumni_id INT NOT NULL REFERENCES alumni(alumni_id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    achievement_date DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    message TEXT NOT NULL,
+    type VARCHAR(50) DEFAULT 'INFO',
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE event_invites (
+    invite_id SERIAL PRIMARY KEY,
+    event_id INT NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    invited_by INT REFERENCES users(user_id) ON DELETE SET NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'ACCEPTED', 'DECLINED')),
+    invited_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_event_invites_event_user UNIQUE (event_id, user_id)
 );
 
 
@@ -314,16 +369,16 @@ CREATE INDEX idx_events_date
 
 CREATE INDEX idx_jobs_deadline
     ON jobs(deadline);
-
 CREATE INDEX idx_jobs_company
+    ON jobs(company);
+CREATE INDEX idx_jobs_company_id
     ON jobs(company_id);
-
 
 CREATE INDEX idx_event_registrations_alumni
     ON event_registrations(alumni_id);
 
 CREATE INDEX idx_mentorship_mentor
-    ON mentorship(mentor_id);
+    ON mentorship(alumni_id);
 
 CREATE INDEX idx_mentorship_mentee
-    ON mentorship(mentee_id);
+    ON mentorship(student_id);
