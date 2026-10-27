@@ -32,7 +32,7 @@ CREATE TABLE users (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_user_role
-        CHECK (role IN ('ADMIN', 'ALUMNI', 'STUDENT'))
+        CHECK (role IN ('ADMIN', 'ALUMNI', 'STUDENT','FACULTY'))
 );
 
 
