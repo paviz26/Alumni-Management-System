@@ -154,7 +154,7 @@ ORDER BY registered_alumni DESC;
 
 SELECT
     j.title,
-    c.company_name,
+    COALESCE(j.company, c.company_name) AS company_name,
     j.location,
     j.employment_type,
     j.deadline,
@@ -174,7 +174,7 @@ ORDER BY j.deadline;
 
 SELECT
     j.title AS job_title,
-    c.company_name,
+    COALESCE(j.company, c.company_name) AS company_name,
     a.first_name || ' ' || a.last_name AS posted_by,
     j.location,
     j.employment_type
@@ -188,20 +188,22 @@ ORDER BY j.created_at DESC;
 
 -- ============================================================
 -- 12. ACCEPTED MENTORSHIPS
--- Demonstrates: Self-referencing relationship
+-- Demonstrates: Student-to-alumni relationship
 -- ============================================================
 
 SELECT
     m.mentorship_id,
     mentor.first_name || ' ' || mentor.last_name AS mentor,
-    mentee.first_name || ' ' || mentee.last_name AS mentee,
+    mentee_user.first_name || ' ' || mentee_user.last_name AS mentee,
     m.status,
-    m.requested_at
+    m.requested_on
 FROM mentorship m
 JOIN alumni mentor
-    ON m.mentor_id = mentor.alumni_id
-JOIN alumni mentee
-    ON m.mentee_id = mentee.alumni_id
+    ON m.alumni_id = mentor.alumni_id
+JOIN students mentee
+    ON m.student_id = mentee.student_id
+JOIN users mentee_user
+    ON mentee.user_id = mentee_user.user_id
 WHERE m.status = 'ACCEPTED';
 
 
@@ -211,15 +213,17 @@ WHERE m.status = 'ACCEPTED';
 
 SELECT
     mentor.first_name || ' ' || mentor.last_name AS mentor,
-    mentee.first_name || ' ' || mentee.last_name AS mentee,
+    mentee_user.first_name || ' ' || mentee_user.last_name AS mentee,
     m.status,
-    m.requested_at
+    m.requested_on
 FROM mentorship m
 JOIN alumni mentor
-    ON m.mentor_id = mentor.alumni_id
-JOIN alumni mentee
-    ON m.mentee_id = mentee.alumni_id
-ORDER BY m.requested_at DESC;
+    ON m.alumni_id = mentor.alumni_id
+JOIN students mentee
+    ON m.student_id = mentee.student_id
+JOIN users mentee_user
+    ON mentee.user_id = mentee_user.user_id
+ORDER BY m.requested_on DESC;
 
 
 -- ============================================================

@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
 from app.db.database import get_db
-from app.db.models import Alumni, Department, Mentorship, Notification, Student, User
+from app.db.models import Alumni, Faculty, Mentorship, Notification, Student, User
 from app.schemas import MentorshipCreate, MentorshipStatusUpdate
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/mentorship", tags=["Mentorship"])
+router = APIRouter(prefix="/mentorship", tags=["Mentorship"], route_class=CompatibleAPIRoute)
 
 
 def _current_student(db: Session, user: User) -> Student | None:
@@ -23,7 +22,7 @@ def _current_alumni(db: Session, user: User) -> Alumni | None:
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_mentorship(payload: MentorshipCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if current_user.role not in {"STUDENT", "ALUMNI"}:
+    if current_user.role != "STUDENT":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students may request mentorship")
     mentor = db.query(Alumni).filter(Alumni.alumni_id == payload.mentor_id).first()
     if not mentor:
@@ -45,14 +44,11 @@ def create_mentorship(payload: MentorshipCreate, db: Session = Depends(get_db), 
         message=payload.message.strip(),
         status="PENDING",
     )
-    db.add(mentorship)
-    db.commit()
-    db.refresh(mentorship)
-
     mentor_user = db.query(User).filter(User.user_id == mentor.user_id).first()
     if mentor_user:
         db.add(Notification(user_id=mentor_user.user_id, message=f"{current_user.first_name or current_user.email} requested mentorship in {payload.area_of_interest}.", type="MENTORSHIP", is_read=False))
     db.commit()
+    db.refresh(mentorship)
     return {"mentorship_id": mentorship.mentorship_id, "status": mentorship.status, "mentor_id": mentor.alumni_id}
 
 
@@ -135,7 +131,10 @@ def mentorship_overview(db: Session = Depends(get_db), current_user: User = Depe
         else:
             return {"active": 0, "completed": 0, "pending": 0}
     elif current_user.role == "FACULTY":
-        pass
+        faculty = db.query(Faculty).filter_by(user_id=current_user.user_id).first()
+        if not faculty or faculty.department_id is None:
+            return {"active": 0, "completed": 0, "pending": 0}
+        query = query.join(Student, Student.student_id == Mentorship.student_id).filter(Student.department_id == faculty.department_id)
     else:
         student = _current_student(db, current_user)
         if student:
@@ -156,8 +155,17 @@ def update_mentorship(mentorship_id: int, payload: MentorshipStatusUpdate, db: S
     if not mentorship:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mentorship request not found")
     alumni = _current_alumni(db, current_user)
-    if current_user.role != "ADMIN" and alumni and mentorship.alumni_id != alumni.alumni_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the assigned alumni can update this request")
+    is_assigned_mentor = bool(alumni and mentorship.alumni_id == alumni.alumni_id)
+    if current_user.role != "ADMIN" and not is_assigned_mentor:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the assigned alumni or an administrator may update this request")
+    allowed_transitions = {
+        "PENDING": {"ACCEPTED", "REJECTED"},
+        "ACCEPTED": {"COMPLETED"},
+        "REJECTED": set(),
+        "COMPLETED": set(),
+    }
+    if current_user.role != "ADMIN" and payload.status not in allowed_transitions.get(mentorship.status, set()):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid mentorship status transition")
     mentorship.status = payload.status
     student = db.query(Student).filter(Student.student_id == mentorship.student_id).first()
     if student and student.user_id != current_user.user_id:

@@ -148,8 +148,8 @@ WHERE mentorship_id = 2;
 -- Check the temporary change
 SELECT
     mentorship_id,
-    mentor_id,
-    mentee_id,
+    student_id,
+    alumni_id,
     status
 FROM mentorship
 WHERE mentorship_id = 2;
@@ -161,8 +161,8 @@ ROLLBACK;
 -- Verify that the original value has been restored
 SELECT
     mentorship_id,
-    mentor_id,
-    mentee_id,
+    student_id,
+    alumni_id,
     status
 FROM mentorship
 WHERE mentorship_id = 2;

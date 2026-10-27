@@ -3,7 +3,8 @@
 -- DATABASE ROLES AND PERMISSIONS
 -- ============================================================
 
--- Run this file as PostgreSQL administrator (postgres).
+-- Run this file as a PostgreSQL administrator. It creates login roles without
+-- embedding passwords; set credentials interactively with psql's \password.
 
 
 -- ============================================================
@@ -17,21 +18,21 @@ BEGIN
         SELECT FROM pg_roles
         WHERE rolname = 'alumni_admin'
     ) THEN
-        CREATE ROLE alumni_admin LOGIN PASSWORD 'change_me_admin';
+        CREATE ROLE alumni_admin LOGIN;
     END IF;
 
     IF NOT EXISTS (
         SELECT FROM pg_roles
         WHERE rolname = 'alumni_app'
     ) THEN
-        CREATE ROLE alumni_app LOGIN PASSWORD 'change_me_app';
+        CREATE ROLE alumni_app LOGIN;
     END IF;
 
     IF NOT EXISTS (
         SELECT FROM pg_roles
         WHERE rolname = 'alumni_readonly'
     ) THEN
-        CREATE ROLE alumni_readonly LOGIN PASSWORD 'change_me_readonly';
+        CREATE ROLE alumni_readonly LOGIN;
     END IF;
 
 END

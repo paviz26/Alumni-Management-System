@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -9,13 +7,17 @@ from app.core.dependencies import get_current_user
 from app.db.database import get_db
 from app.db.models import Announcement, User
 from app.schemas import AnnouncementCreate
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/announcements", tags=["Announcements"])
+router = APIRouter(prefix="/announcements", tags=["Announcements"], route_class=CompatibleAPIRoute)
 
 
 @router.get("")
 def list_announcements(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    rows = db.query(Announcement).order_by(Announcement.created_on.desc()).all()
+    query = db.query(Announcement)
+    if current_user.role not in {"ADMIN", "FACULTY"}:
+        query = query.filter(Announcement.status == "PUBLISHED")
+    rows = query.order_by(Announcement.created_on.desc()).all()
     return [{
         "announcement_id": item.announcement_id,
         "title": item.title,
@@ -27,7 +29,7 @@ def list_announcements(db: Session = Depends(get_db), current_user: User = Depen
 
 @router.get("/recent")
 def recent_announcements(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    rows = db.query(Announcement).order_by(Announcement.created_on.desc()).limit(5).all()
+    rows = db.query(Announcement).filter(Announcement.status == "PUBLISHED").order_by(Announcement.created_on.desc()).limit(5).all()
     return [{
         "announcement_id": item.announcement_id,
         "title": item.title,
@@ -45,3 +47,28 @@ def create_announcement(payload: AnnouncementCreate, db: Session = Depends(get_d
     db.commit()
     db.refresh(announcement)
     return {"announcement_id": announcement.announcement_id, "title": announcement.title, "status": announcement.status}
+
+
+@router.put("/{announcement_id}")
+def update_announcement(announcement_id: int, payload: AnnouncementCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    announcement = db.query(Announcement).filter(Announcement.announcement_id == announcement_id).first()
+    if announcement is None:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    if current_user.role != "ADMIN" and (current_user.role != "FACULTY" or announcement.user_id != current_user.user_id):
+        raise HTTPException(status_code=403, detail="Only the creator or an administrator may update this announcement")
+    announcement.title = payload.title.strip()
+    announcement.content = payload.content.strip()
+    db.commit()
+    return {"success": True, "announcement_id": announcement.announcement_id, "title": announcement.title}
+
+
+@router.delete("/{announcement_id}")
+def delete_announcement(announcement_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    announcement = db.query(Announcement).filter(Announcement.announcement_id == announcement_id).first()
+    if announcement is None:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    if current_user.role != "ADMIN" and (current_user.role != "FACULTY" or announcement.user_id != current_user.user_id):
+        raise HTTPException(status_code=403, detail="Only the creator or an administrator may delete this announcement")
+    db.delete(announcement)
+    db.commit()
+    return {"success": True, "message": "Announcement deleted"}

@@ -4,14 +4,16 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
 from app.db.database import get_db
 from app.db.models import Alumni, Connection, Department, Notification, User
 from app.schemas import ConnectionRequest, ConnectionStatusUpdate
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/connections", tags=["Connections"])
+router = APIRouter(prefix="/connections", tags=["Connections"], route_class=CompatibleAPIRoute)
 
 
 @router.post("/request", status_code=status.HTTP_201_CREATED)
@@ -35,13 +37,15 @@ def request_connection(payload: ConnectionRequest, db: Session = Depends(get_db)
 
     connection = Connection(sender_id=current_user.user_id, receiver_id=target_alumni.user_id, status="PENDING")
     db.add(connection)
-    db.commit()
-    db.refresh(connection)
-
     target_user = db.query(User).filter(User.user_id == target_alumni.user_id).first()
     if target_user:
         db.add(Notification(user_id=target_user.user_id, message=f"{current_user.first_name or current_user.email} sent you a connection request.", type="CONNECTION", is_read=False))
-    db.commit()
+    try:
+        db.commit()
+        db.refresh(connection)
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Connection request already exists") from exc
     return {"success": True, "message": "Connection request sent successfully", "connection_id": connection.connection_id}
 
 
@@ -60,7 +64,7 @@ def list_connections(db: Session = Depends(get_db), current_user: User = Depends
 
 @router.get("/requests")
 def incoming_requests(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    records = db.query(Connection).filter(Connection.receiver_id == current_user.user_id).order_by(Connection.requested_on.desc()).all()
+    records = db.query(Connection).filter(Connection.receiver_id == current_user.user_id, Connection.status == "PENDING").order_by(Connection.requested_on.desc()).all()
     result = []
     for item in records:
         sender = db.query(User).filter(User.user_id == item.sender_id).first()
@@ -123,6 +127,8 @@ def update_connection(connection_id: int, payload: ConnectionStatusUpdate, db: S
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Connection not found")
     if connection.receiver_id != current_user.user_id and current_user.role != "ADMIN":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the receiver can update this connection")
+    if connection.status != "PENDING":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only pending connection requests can be answered")
     connection.status = payload.status
     if payload.status == "ACCEPTED":
         connection.accepted_on = datetime.utcnow()
