@@ -47,6 +47,11 @@ const RegisterPage = () => {
       return;
     }
 
+    if (new TextEncoder().encode(formData.password).length > 72) {
+      setError('Password must be no more than 72 UTF-8 bytes');
+      return;
+    }
+
     // Build registration data based on role
     const registrationData = {
       firstName: formData.firstName,
@@ -88,7 +93,7 @@ const RegisterPage = () => {
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError('Network error. Please check your connection and try again.');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -200,14 +205,11 @@ const RegisterPage = () => {
               required
             >
               <option value="">Select department</option>
-              <option value="CSE">Computer Science & Engineering</option>
-              <option value="ECE">Electronics & Communication</option>
-              <option value="EEE">Electrical & Electronics</option>
-              <option value="MECH">Mechanical Engineering</option>
-              <option value="CIVIL">Civil Engineering</option>
-              <option value="IT">Information Technology</option>
-              <option value="AI">Artificial Intelligence</option>
-              <option value="DATA">Data Science</option>
+              <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+              <option value="Electronics and Communication Engineering">Electronics and Communication Engineering</option>
+              <option value="Electrical and Electronics Engineering">Electrical and Electronics Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Artificial Intelligence and Data Science">Artificial Intelligence and Data Science</option>
             </select>
           </div>
 
@@ -238,7 +240,7 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="Enter graduation year"
                   min="1950"
-                  max="2100"
+                  max={new Date().getUTCFullYear() + 10}
                   required
                 />
               </div>

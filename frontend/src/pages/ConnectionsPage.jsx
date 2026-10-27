@@ -43,7 +43,7 @@ const ConnectionsPage = () => {
       }
     } catch (error) {
       console.error('Error responding to request:', error);
-      alert('Network error. Please try again.');
+      alert(error.message || 'Failed to update connection request.');
     }
   };
 
@@ -58,7 +58,7 @@ const ConnectionsPage = () => {
       }
     } catch (error) {
       console.error('Error cancelling request:', error);
-      alert('Network error. Please try again.');
+      alert(error.message || 'Failed to cancel connection request.');
     }
   };
 

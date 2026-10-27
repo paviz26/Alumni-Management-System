@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -11,6 +12,7 @@ const StudentDashboard = () => {
   const [careerOpportunities, setCareerOpportunities] = useState([]);
   const [mentorshipRequests, setMentorshipRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     loadDashboardData();
@@ -33,6 +35,7 @@ const StudentDashboard = () => {
       setMentorshipRequests(Array.isArray(mentorshipData) ? mentorshipData : mentorshipData?.requests || []);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      setErrorMessage(error.message || 'Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -49,39 +52,11 @@ const StudentDashboard = () => {
       }
     } catch (error) {
       console.error('Error sending connection request:', error);
-      alert('Network error. Please try again.');
+      alert(error.message || 'Failed to send connection request.');
     }
   };
 
-  const registerForEvent = async (eventId) => {
-    try {
-      const data = await api.post(`/events/${eventId}/register`, {}, authToken);
-      if (data.success) {
-        alert('Event registration successful!');
-        loadDashboardData();
-      } else {
-        alert(data.message || 'Failed to register for event');
-      }
-    } catch (error) {
-      console.error('Error registering for event:', error);
-      alert('Network error. Please try again.');
-    }
-  };
 
-  const applyForJob = async (jobId) => {
-    try {
-      const data = await api.post(`/jobs/${jobId}/apply`, {}, authToken);
-      if (data.success) {
-        alert('Job application submitted successfully!');
-        loadDashboardData();
-      } else {
-        alert(data.message || 'Failed to apply for job');
-      }
-    } catch (error) {
-      console.error('Error applying for job:', error);
-      alert('Network error. Please try again.');
-    }
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
@@ -100,12 +75,12 @@ const StudentDashboard = () => {
   return (
     <DashboardLayout title={`Welcome, ${currentUser?.firstName}!`}>
       <div className="dashboard-grid">
+        {errorMessage && <p className="error-message" role="alert">{errorMessage}</p>}
         <div className="card" style={{ gridColumn: 'span 2' }}>
           <h3>Quick Actions</h3>
-          <div className="search-bar">
-            <input type="text" placeholder="Search alumni..." />
-            <button>Search Alumni</button>
-          </div>
+          <p><Link to="/directory">Search the alumni directory</Link></p>
+          <p><Link to="/mentorship">Find a mentor</Link></p>
+          <p><Link to="/jobs">Browse jobs and record applications</Link></p>
         </div>
 
         <div className="card">
@@ -156,11 +131,6 @@ const StudentDashboard = () => {
                   <p>{formatDate(event.eventDate)} • {event.venue}</p>
                   <p>Type: {event.type}</p>
                 </div>
-                <div className="list-item-actions">
-                  <button className="btn btn-primary" onClick={() => registerForEvent(event.eventId)}>
-                    Register
-                  </button>
-                </div>
               </div>
             ))
           )}
@@ -179,9 +149,7 @@ const StudentDashboard = () => {
                   <p>Deadline: {formatDate(job.deadline)}</p>
                 </div>
                 <div className="list-item-actions">
-                  <button className="btn btn-primary" onClick={() => applyForJob(job.jobId)}>
-                    Apply
-                  </button>
+                  <Link to="/jobs" className="btn btn-primary">View job</Link>
                 </div>
               </div>
             ))
@@ -193,7 +161,7 @@ const StudentDashboard = () => {
           {mentorshipRequests.length === 0 ? (
             <>
               <p>No active mentorship requests.</p>
-              <button className="btn btn-primary">Find a Mentor</button>
+              <Link to="/mentorship" className="btn btn-primary">Find a Mentor</Link>
             </>
           ) : (
             mentorshipRequests.slice(0, 3).map((mentorship) => (
