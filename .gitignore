@@ -8,3 +8,26 @@ coverage/
 dist/
 build/
 *.zip
+__pycache__/
+
+
+# Byte-compiled and C extensions
+__pycache__/
+*.py[cod]
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
