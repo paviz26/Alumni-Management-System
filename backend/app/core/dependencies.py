@@ -22,7 +22,11 @@ def get_current_user(
 
     token = credentials.credentials
     user_id = decode_access_token(token)
-    user = db.query(User).filter(User.user_id == int(user_id)).first()
+    try:
+        parsed_user_id = int(user_id)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject") from exc
+    user = db.query(User).filter(User.user_id == parsed_user_id).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
@@ -35,6 +39,10 @@ def require_roles(*roles: str):
         return user
 
     return dependency
+
+
+def require_role(role: str):
+    return require_roles(role)
 
 
 def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:

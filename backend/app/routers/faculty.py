@@ -3,11 +3,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_user
+from app.core.dependencies import require_roles
 from app.db.database import get_db
 from app.db.models import Alumni, Department, Faculty, Student, User
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/faculty", tags=["Faculty"])
+router = APIRouter(prefix="/faculty", tags=["Faculty"], route_class=CompatibleAPIRoute)
 
 
 def _faculty_profile(db: Session, user: User) -> Faculty | None:
@@ -15,7 +16,7 @@ def _faculty_profile(db: Session, user: User) -> Faculty | None:
 
 
 @router.get("/department-stats")
-def department_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def department_stats(db: Session = Depends(get_db), current_user: User = Depends(require_roles("FACULTY"))):
     faculty = _faculty_profile(db, current_user)
     if not faculty:
         return {"students": 0, "alumni": 0}
@@ -24,7 +25,7 @@ def department_stats(db: Session = Depends(get_db), current_user: User = Depends
 
 
 @router.get("/stats")
-def faculty_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def faculty_stats(db: Session = Depends(get_db), current_user: User = Depends(require_roles("FACULTY"))):
     faculty = _faculty_profile(db, current_user)
     if not faculty:
         return {"students": 0, "alumni": 0}
@@ -32,7 +33,7 @@ def faculty_stats(db: Session = Depends(get_db), current_user: User = Depends(ge
 
 
 @router.get("/students")
-def faculty_students(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def faculty_students(db: Session = Depends(get_db), current_user: User = Depends(require_roles("FACULTY"))):
     faculty = _faculty_profile(db, current_user)
     if not faculty or not faculty.department_id:
         return []
@@ -52,7 +53,7 @@ def faculty_students(db: Session = Depends(get_db), current_user: User = Depends
 
 
 @router.get("/alumni")
-def faculty_alumni(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def faculty_alumni(db: Session = Depends(get_db), current_user: User = Depends(require_roles("FACULTY"))):
     faculty = _faculty_profile(db, current_user)
     if not faculty or not faculty.department_id:
         return []

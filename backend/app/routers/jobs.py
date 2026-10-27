@@ -4,14 +4,16 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
 from app.db.database import get_db
 from app.db.models import Alumni, JobApplication, JobPosting, Notification, Student, User
 from app.schemas import JobCreate
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/jobs", tags=["Jobs"])
+router = APIRouter(prefix="/jobs", tags=["Jobs"], route_class=CompatibleAPIRoute)
 
 
 def _current_student(db: Session, user: User) -> Student | None:
@@ -109,9 +111,11 @@ def create_job(payload: JobCreate, db: Session = Depends(get_db), current_user: 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alumni profile not found")
     if not payload.title.strip():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Title is required")
+    if payload.deadline and payload.deadline < datetime.utcnow().date():
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Deadline cannot be in the past")
     job = JobPosting(
         posted_by=alumni.alumni_id if alumni else None,
-        company=payload.company.strip() if payload.company else "Company",
+        company=payload.company.strip() if payload.company else None,
         job_title=payload.title.strip(),
         description=payload.description.strip() if payload.description else None,
         location=payload.location.strip() if payload.location else None,
@@ -123,6 +127,27 @@ def create_job(payload: JobCreate, db: Session = Depends(get_db), current_user: 
     db.commit()
     db.refresh(job)
     return {"job_id": job.job_id, "title": job.job_title, "status": "created"}
+
+
+@router.put("/{job_id}")
+def update_job(job_id: int, payload: JobCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    job = db.query(JobPosting).filter(JobPosting.job_id == job_id).first()
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    alumni = _current_alumni(db, current_user)
+    if current_user.role != "ADMIN" and (current_user.role != "ALUMNI" or not alumni or job.posted_by != alumni.alumni_id):
+        raise HTTPException(status_code=403, detail="Only the posting alumni or an administrator may update this job")
+    if payload.deadline and payload.deadline < datetime.utcnow().date():
+        raise HTTPException(status_code=422, detail="Deadline cannot be in the past")
+    job.job_title = payload.title.strip()
+    job.description = payload.description.strip() if payload.description else None
+    job.company = payload.company.strip() if payload.company else None
+    job.location = payload.location.strip() if payload.location else None
+    job.job_type = payload.employmentType.strip() if payload.employmentType else None
+    job.deadline = payload.deadline
+    job.application_link = payload.applicationUrl.strip() if payload.applicationUrl else None
+    db.commit()
+    return {"success": True, "job_id": job.job_id, "title": job.job_title}
 
 
 @router.post("/{job_id}/apply", status_code=status.HTTP_201_CREATED)
@@ -142,10 +167,13 @@ def apply_for_job(job_id: int, db: Session = Depends(get_db), current_user: User
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You already applied for this job")
     application = JobApplication(job_id=job_id, student_id=student.student_id, status="PENDING")
     db.add(application)
-    db.commit()
-    db.refresh(application)
     db.add(Notification(user_id=current_user.user_id, message=f"Application submitted for {job.job_title}.", type="JOB", is_read=False))
-    db.commit()
+    try:
+        db.commit()
+        db.refresh(application)
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You already applied for this job") from exc
     return {"application_id": application.application_id, "job_id": job_id, "status": application.status}
 
 

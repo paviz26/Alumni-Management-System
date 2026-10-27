@@ -30,6 +30,16 @@ VALUES
     ('vishal.reddy@example.com', 'hashed_password_5', 'ALUMNI'),
     ('student1@university.edu', 'hashed_student_password', 'STUDENT');
 
+INSERT INTO students (user_id, department_id, registration_number)
+VALUES (
+    (SELECT user_id FROM users WHERE email = 'student1@university.edu'),
+    (SELECT department_id FROM departments WHERE department_code = 'CSE'),
+    'SAMPLE-STUDENT-001'
+);
+UPDATE users
+SET first_name = 'Sample', last_name = 'Student'
+WHERE email = 'student1@university.edu';
+
 
 -- ============================================================
 -- 3. COMPANIES
@@ -213,6 +223,7 @@ VALUES
 INSERT INTO jobs (
     company_id,
     posted_by,
+    company,
     title,
     description,
     location,
@@ -224,6 +235,7 @@ VALUES
 (
     (SELECT company_id FROM companies WHERE company_name = 'Google'),
     (SELECT alumni_id FROM alumni WHERE first_name = 'Rahul'),
+    'Google',
     'Software Engineer',
     'Software engineering opportunity for computer science graduates.',
     'Bangalore',
@@ -234,6 +246,7 @@ VALUES
 (
     (SELECT company_id FROM companies WHERE company_name = 'Microsoft'),
     (SELECT alumni_id FROM alumni WHERE first_name = 'Priya'),
+    'Microsoft',
     'Data Scientist',
     'Data science role involving machine learning and analytics.',
     'Hyderabad',
@@ -244,6 +257,7 @@ VALUES
 (
     (SELECT company_id FROM companies WHERE company_name = 'Amazon'),
     (SELECT alumni_id FROM alumni WHERE first_name = 'Arjun'),
+    'Amazon',
     'Cloud Engineer',
     'Cloud engineering role focused on scalable infrastructure.',
     'Bangalore',
@@ -258,24 +272,32 @@ VALUES
 -- ============================================================
 
 INSERT INTO mentorship (
-    mentor_id,
-    mentee_id,
+    student_id,
+    alumni_id,
+    area_of_interest,
+    message,
     status
 )
 VALUES
 (
+    (SELECT student_id FROM students WHERE registration_number = 'SAMPLE-STUDENT-001'),
     (SELECT alumni_id FROM alumni WHERE first_name = 'Rahul'),
-    (SELECT alumni_id FROM alumni WHERE first_name = 'Arjun'),
+    'Cloud engineering',
+    'Interested in cloud career guidance',
     'ACCEPTED'
 ),
 (
+    (SELECT student_id FROM students WHERE registration_number = 'SAMPLE-STUDENT-001'),
     (SELECT alumni_id FROM alumni WHERE first_name = 'Priya'),
-    (SELECT alumni_id FROM alumni WHERE first_name = 'Sneha'),
+    'Data science',
+    'Interested in analytics and ML',
     'PENDING'
 ),
 (
+    (SELECT student_id FROM students WHERE registration_number = 'SAMPLE-STUDENT-001'),
     (SELECT alumni_id FROM alumni WHERE first_name = 'Vishal'),
-    (SELECT alumni_id FROM alumni WHERE first_name = 'Arjun'),
+    'Leadership',
+    'Looking for project leadership advice',
     'COMPLETED'
 );
 

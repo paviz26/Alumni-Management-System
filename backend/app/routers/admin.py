@@ -10,8 +10,9 @@ from app.core.dependencies import require_admin
 from app.db.database import get_db
 from app.db.models import Alumni, Department, Event, Notification, User
 from app.schemas import ReasonPayload
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(prefix="/admin", tags=["Administration"])
+router = APIRouter(prefix="/admin", tags=["Administration"], route_class=CompatibleAPIRoute)
 
 
 @router.get("/statistics")

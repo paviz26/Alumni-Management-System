@@ -1,6 +1,7 @@
 from fastapi import APIRouter
+from app.core.compat import CompatibleAPIRoute
 
-router = APIRouter(tags=["Health"])
+router = APIRouter(tags=["Health"], route_class=CompatibleAPIRoute)
 
 
 @router.get("/health")

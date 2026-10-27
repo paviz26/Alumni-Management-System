@@ -85,7 +85,8 @@ CREATE OR REPLACE VIEW job_opportunities AS
 SELECT
     j.job_id,
     j.title AS job_title,
-    c.company_name,
+    COALESCE(j.company, c.company_name) AS company_name,
+    NULL::VARCHAR AS industry,
     j.location,
     j.employment_type,
     j.deadline,
@@ -106,15 +107,19 @@ LEFT JOIN alumni a
 CREATE OR REPLACE VIEW mentorship_directory AS
 SELECT
     m.mentorship_id,
-    mentor.first_name || ' ' || mentor.last_name AS mentor,
-    mentee.first_name || ' ' || mentee.last_name AS mentee,
+    COALESCE(mentor.first_name, mentor_user.first_name) || ' ' || COALESCE(mentor.last_name, mentor_user.last_name, '') AS mentor,
+    mentee_user.first_name || ' ' || mentee_user.last_name AS mentee,
     m.status,
-    m.requested_at
+    m.requested_on
 FROM mentorship m
 JOIN alumni mentor
-    ON m.mentor_id = mentor.alumni_id
-JOIN alumni mentee
-    ON m.mentee_id = mentee.alumni_id;
+    ON m.alumni_id = mentor.alumni_id
+JOIN users mentor_user
+    ON mentor.user_id = mentor_user.user_id
+JOIN students mentee
+    ON m.student_id = mentee.student_id
+JOIN users mentee_user
+    ON mentee.user_id = mentee_user.user_id;
 
 
 -- ============================================================
