@@ -11,6 +11,7 @@ const StudentDashboard = () => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [careerOpportunities, setCareerOpportunities] = useState([]);
   const [mentorshipRequests, setMentorshipRequests] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -20,12 +21,13 @@ const StudentDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [notifData, alumniData, eventsData, jobsData, mentorshipData] = await Promise.all([
+      const [notifData, alumniData, eventsData, jobsData, mentorshipData, announcementsData] = await Promise.all([
         api.get('/notifications', authToken),
         api.get('/alumni/suggested', authToken),
         api.get('/events/upcoming', authToken),
         api.get('/jobs/recent', authToken),
         api.get('/mentorship/my-requests', authToken),
+        api.get('/announcements/recent', authToken),
       ]);
 
       setNotifications(Array.isArray(notifData) ? notifData : notifData?.notifications || []);
@@ -33,6 +35,15 @@ const StudentDashboard = () => {
       setUpcomingEvents(Array.isArray(eventsData) ? eventsData : eventsData?.events || []);
       setCareerOpportunities(Array.isArray(jobsData) ? jobsData : jobsData?.jobs || []);
       setMentorshipRequests(Array.isArray(mentorshipData) ? mentorshipData : mentorshipData?.requests || []);
+      setAnnouncements(Array.isArray(announcementsData) ? announcementsData.map(a => ({
+        ...a,
+        publishedAt: a.published_at || a.publishedAt,
+        createdOn: a.created_on || a.createdOn
+      })) : (announcementsData?.announcements || []).map(a => ({
+        ...a,
+        publishedAt: a.published_at || a.publishedAt,
+        createdOn: a.created_on || a.createdOn
+      })));
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       setErrorMessage(error.message || 'Failed to load dashboard data.');
@@ -170,6 +181,26 @@ const StudentDashboard = () => {
                   <h4>{mentorship.mentorName}</h4>
                   <p>Status: {mentorship.status}</p>
                   <p>Area: {mentorship.areaOfInterest}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="card">
+          <h3>Recent Announcements</h3>
+          {announcements.length === 0 ? (
+            <p>No recent announcements.</p>
+          ) : (
+            announcements.slice(0, 3).map((announcement) => (
+              <div key={announcement.announcementId} className="list-item">
+                <div className="list-item-info">
+                  <h4>{announcement.title}</h4>
+                  <p>{announcement.content?.substring(0, 100) || ''}{announcement.content && announcement.content.length > 100 ? '...' : ''}</p>
+                  <p className="notification-time">{new Date(announcement.publishedAt || announcement.createdOn).toLocaleDateString()}</p>
+                </div>
+                <div className="list-item-actions">
+                  <Link to={`/announcements/${announcement.announcementId}`} className="btn btn-primary">View</Link>
                 </div>
               </div>
             ))
