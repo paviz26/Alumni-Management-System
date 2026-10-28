@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -10,7 +11,9 @@ const StudentDashboard = () => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [careerOpportunities, setCareerOpportunities] = useState([]);
   const [mentorshipRequests, setMentorshipRequests] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     loadDashboardData();
@@ -18,12 +21,13 @@ const StudentDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [notifData, alumniData, eventsData, jobsData, mentorshipData] = await Promise.all([
+      const [notifData, alumniData, eventsData, jobsData, mentorshipData, announcementsData] = await Promise.all([
         api.get('/notifications', authToken),
         api.get('/alumni/suggested', authToken),
         api.get('/events/upcoming', authToken),
         api.get('/jobs/recent', authToken),
         api.get('/mentorship/my-requests', authToken),
+        api.get('/announcements/recent', authToken),
       ]);
 
       setNotifications(Array.isArray(notifData) ? notifData : notifData?.notifications || []);
@@ -31,8 +35,18 @@ const StudentDashboard = () => {
       setUpcomingEvents(Array.isArray(eventsData) ? eventsData : eventsData?.events || []);
       setCareerOpportunities(Array.isArray(jobsData) ? jobsData : jobsData?.jobs || []);
       setMentorshipRequests(Array.isArray(mentorshipData) ? mentorshipData : mentorshipData?.requests || []);
+      setAnnouncements(Array.isArray(announcementsData) ? announcementsData.map(a => ({
+        ...a,
+        publishedAt: a.published_at || a.publishedAt,
+        createdOn: a.created_on || a.createdOn
+      })) : (announcementsData?.announcements || []).map(a => ({
+        ...a,
+        publishedAt: a.published_at || a.publishedAt,
+        createdOn: a.created_on || a.createdOn
+      })));
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      setErrorMessage(error.message || 'Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -49,39 +63,11 @@ const StudentDashboard = () => {
       }
     } catch (error) {
       console.error('Error sending connection request:', error);
-      alert('Network error. Please try again.');
+      alert(error.message || 'Failed to send connection request.');
     }
   };
 
-  const registerForEvent = async (eventId) => {
-    try {
-      const data = await api.post(`/events/${eventId}/register`, {}, authToken);
-      if (data.success) {
-        alert('Event registration successful!');
-        loadDashboardData();
-      } else {
-        alert(data.message || 'Failed to register for event');
-      }
-    } catch (error) {
-      console.error('Error registering for event:', error);
-      alert('Network error. Please try again.');
-    }
-  };
 
-  const applyForJob = async (jobId) => {
-    try {
-      const data = await api.post(`/jobs/${jobId}/apply`, {}, authToken);
-      if (data.success) {
-        alert('Job application submitted successfully!');
-        loadDashboardData();
-      } else {
-        alert(data.message || 'Failed to apply for job');
-      }
-    } catch (error) {
-      console.error('Error applying for job:', error);
-      alert('Network error. Please try again.');
-    }
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
@@ -100,12 +86,12 @@ const StudentDashboard = () => {
   return (
     <DashboardLayout title={`Welcome, ${currentUser?.firstName}!`}>
       <div className="dashboard-grid">
+        {errorMessage && <p className="error-message" role="alert">{errorMessage}</p>}
         <div className="card" style={{ gridColumn: 'span 2' }}>
           <h3>Quick Actions</h3>
-          <div className="search-bar">
-            <input type="text" placeholder="Search alumni..." />
-            <button>Search Alumni</button>
-          </div>
+          <p><Link to="/directory">Search the alumni directory</Link></p>
+          <p><Link to="/mentorship">Find a mentor</Link></p>
+          <p><Link to="/jobs">Browse jobs and record applications</Link></p>
         </div>
 
         <div className="card">
@@ -156,11 +142,6 @@ const StudentDashboard = () => {
                   <p>{formatDate(event.eventDate)} • {event.venue}</p>
                   <p>Type: {event.type}</p>
                 </div>
-                <div className="list-item-actions">
-                  <button className="btn btn-primary" onClick={() => registerForEvent(event.eventId)}>
-                    Register
-                  </button>
-                </div>
               </div>
             ))
           )}
@@ -179,9 +160,7 @@ const StudentDashboard = () => {
                   <p>Deadline: {formatDate(job.deadline)}</p>
                 </div>
                 <div className="list-item-actions">
-                  <button className="btn btn-primary" onClick={() => applyForJob(job.jobId)}>
-                    Apply
-                  </button>
+                  <Link to="/jobs" className="btn btn-primary">View job</Link>
                 </div>
               </div>
             ))
@@ -193,7 +172,7 @@ const StudentDashboard = () => {
           {mentorshipRequests.length === 0 ? (
             <>
               <p>No active mentorship requests.</p>
-              <button className="btn btn-primary">Find a Mentor</button>
+              <Link to="/mentorship" className="btn btn-primary">Find a Mentor</Link>
             </>
           ) : (
             mentorshipRequests.slice(0, 3).map((mentorship) => (
@@ -202,6 +181,26 @@ const StudentDashboard = () => {
                   <h4>{mentorship.mentorName}</h4>
                   <p>Status: {mentorship.status}</p>
                   <p>Area: {mentorship.areaOfInterest}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="card">
+          <h3>Recent Announcements</h3>
+          {announcements.length === 0 ? (
+            <p>No recent announcements.</p>
+          ) : (
+            announcements.slice(0, 3).map((announcement) => (
+              <div key={announcement.announcementId} className="list-item">
+                <div className="list-item-info">
+                  <h4>{announcement.title}</h4>
+                  <p>{announcement.content?.substring(0, 100) || ''}{announcement.content && announcement.content.length > 100 ? '...' : ''}</p>
+                  <p className="notification-time">{new Date(announcement.publishedAt || announcement.createdOn).toLocaleDateString()}</p>
+                </div>
+                <div className="list-item-actions">
+                  <Link to={`/announcements/${announcement.announcementId}`} className="btn btn-primary">View</Link>
                 </div>
               </div>
             ))

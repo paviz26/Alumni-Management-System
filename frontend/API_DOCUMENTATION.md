@@ -1,6 +1,18 @@
 # Alumni Management System - Frontend API Documentation
 
-This document provides comprehensive details about the API endpoints that the frontend expects from the backend, including URLs, HTTP methods, request/response formats, authentication behavior, and error handling.
+This document includes the original frontend API reference. For the current backend contract, role requirements, and verified request/response shapes, use the repository's [APIS.md](../APIS.md).
+
+## Current React workflow summary
+
+- The API client checks HTTP status codes, preserves status and validation details, and redirects on 401 after clearing local authentication state.
+- The directory submits keyword and optional filters to `/alumni/search` and supports server pagination without rendering directory email or phone fields.
+- Alumni can edit only their own profile fields. Student event registration is not offered; alumni can register for approved events and cancel their own registrations.
+- Faculty/admins create events; only the event creator or an admin sees event editing controls. Admins approve pending events from the verification page.
+- Alumni manage their own job postings. Students record an in-app application separately from opening an employer URL.
+- Students request/cancel mentorship; alumni manage pending and accepted relationships; faculty see department-level counts.
+- Alumni donation submissions are pledges/records. Admins can finalize pending records; completed is not confirmation of payment.
+
+Event invitations do not have a list or RSVP workflow, and the frontend does not implement a payment provider.
 
 ## Base URL
 ```
@@ -1258,4 +1270,4 @@ All endpoints follow consistent error handling:
 9. **Rate Limiting**: Consider implementing rate limiting for API protection
 10. **Logging**: Implement server-side logging for debugging and monitoring
 
-This frontend implementation expects the backend to follow these API specifications exactly for proper integration and functionality.
+The endpoint descriptions below are retained as a migration-era reference and may not match the current backend field names or response envelopes. Use `APIS.md` as the source of truth.

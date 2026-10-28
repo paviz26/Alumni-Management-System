@@ -1,6 +1,6 @@
 # Backend Changes v2 and Frontend Follow-up
 
-This note records the backend work currently present in this repository and the corresponding React work still expected. It is a handoff document; no frontend changes are made here.
+This note records the backend work and the React follow-up initially expected. The frontend follow-up is now implemented; see the status section at the end for the current result.
 
 ## Backend changes made
 
@@ -42,9 +42,11 @@ This note records the backend work currently present in this repository and the 
 - Reports: admin-only endpoints query the eight SQL views and six SQL functions.
 - `backend/app/routers/admin.py` retains the selected core administration scope: alumni verification and event approval/statistics. General user, department, and company CRUD was not added.
 
-## Frontend follow-up expected
+## Frontend follow-up originally expected
 
-The response compatibility layer currently adds camelCase aliases to backend responses, so the current React components do not need a wholesale snake_case-to-camelCase conversion. The work below addresses role mismatches, missing UI, and response/error handling. Relevant frontend paths are listed for implementation; none have been edited.
+The checklist below captures the original handoff and describes the state before implementation. It is retained for scope/history; use the implementation status at the end of this file for current behavior.
+
+The response compatibility layer adds camelCase aliases to backend responses, so the React components do not need a wholesale snake_case-to-camelCase conversion. The checklist addresses role mismatches, missing UI, and response/error handling.
 
 ### Must fix existing actions that the backend now rejects
 
@@ -120,7 +122,8 @@ The login/registration forms, dashboards, events, jobs, mentorship, connection, 
 
 ## Verification status and limitations
 
-- This file documents source-level changes and inspected frontend call sites; it does not claim the browser workflows were exercised.
+- `npm run build` succeeds for the frontend. End-to-end role workflows still require a configured API/database and corresponding test accounts.
 - Python syntax parsing, ORM metadata creation in in-memory SQLite, FastAPI route registration, and OpenAPI generation were previously verified.
 - The API test run did not complete in the local Python 3.14 / Starlette TestClient environment. PostgreSQL migrations, SQL views/functions/triggers, grants, and event concurrency were not runtime-verified because no disposable PostgreSQL instance was available.
-- No frontend source files were modified as part of this work.
+- Frontend follow-up status: implemented. Directory filtering/pagination, alumni profile editing, role-aware event registration and management, event approval controls, job posting management, role-specific mentorship, announcement editing, donation pledge records, registration validation, and common HTTP error handling are now present in the React client.
+- The frontend deliberately does not implement a payment flow or a complete event invitation/RSVP flow. Creator-only controls use caller-relative `isCreator` flags from the events and announcements list APIs; the backend continues to enforce ownership.

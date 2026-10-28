@@ -37,6 +37,7 @@ const Sidebar = () => {
           { path: '/mentorship', label: 'Mentorship' },
           { path: '/connections', label: 'Connections' },
           { path: '/achievements', label: 'Achievements' },
+          { path: '/donations', label: 'Donations' },
         ];
       case 'FACULTY':
         return [
@@ -51,7 +52,9 @@ const Sidebar = () => {
           { path: '/admin-verification', label: 'Verifications' },
           { path: '/directory', label: 'Directory' },
           { path: '/events', label: 'Events' },
+          { path: '/announcements', label: 'Announcements' },
           { path: '/notifications', label: 'Notifications' },
+          { path: '/donations', label: 'Donations' },
         ];
       default:
         return commonItems;

@@ -91,7 +91,7 @@ Pending events are visible to their creator (FACULTY) and ADMIN; other authentic
 
 | Method and path | Access / ownership | Request | Response / side effects |
 |---|---|---|---|
-| `GET /events` | Authenticated; visibility scoped as above | None | Event array with event id/title/date/venue/capacity/type/status, registration count, `isRegistered`. |
+| `GET /events` | Authenticated; visibility scoped as above | None | Event array with event id/title/date/venue/capacity/type/status, registration count, `isRegistered`, and caller-relative `isCreator` for owner-aware controls. |
 | `GET /events/upcoming` | Authenticated; visibility scoped | None | Upcoming event array. |
 | `GET /events/past` | Authenticated; visibility scoped | None | Past event array with registration/attendance count. |
 | `GET /events/recent` | Authenticated; visibility scoped | None | Up to five events. |
@@ -122,7 +122,7 @@ Canonical runtime table: `jobs`. Company text is stored in `company`; optional `
 
 | Method and path | Access / ownership | Request | Response / side effects |
 |---|---|---|---|
-| `GET /announcements` | Authenticated; ADMIN/FACULTY see all, others published only | None | Array of announcement id/title/content/creator timestamp/status. |
+| `GET /announcements` | Authenticated; ADMIN/FACULTY see all, others published only | None | Array of announcement id/title/content/created timestamp/status and caller-relative `isCreator` for owner-aware controls. |
 | `GET /announcements/recent` | Authenticated; published only | None | Up to five published announcements. |
 | `POST /announcements` | FACULTY or ADMIN | JSON `title`, `content` (non-empty) | 201 id/title/status; creator is caller, status PUBLISHED. |
 | `PUT /announcements/{announcement_id}` | Creator FACULTY or ADMIN | JSON `title`, `content` | Updates announcement. Other roles receive 403. |
@@ -205,4 +205,4 @@ Donation endpoints implement recordkeeping only; no payment gateway is configure
 
 ## Frontend contract notes
 
-The current React pages call a subset of the endpoints above. Compatibility aliases let existing code continue using camelCase while API consumers can use canonical snake_case. The client currently has no pages for donations, event updates, invitations, or announcement editing/deletion. Several page controls (notably directory search and profile editing) are not wired in the frontend; backend routes exist for search/profile update. The API intentionally does not add endpoints solely to match unused frontend controls.
+The React client uses compatibility aliases for camelCase fields while the API retains canonical snake_case fields. It now includes directory search/paging, alumni profile editing, event management/approval/registration, job posting management, role-specific mentorship, announcement editing, and donation recordkeeping. Event invitations still have no list/response workflow, and donations have no payment gateway.

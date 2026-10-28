@@ -24,6 +24,7 @@ def list_announcements(db: Session = Depends(get_db), current_user: User = Depen
         "content": item.content,
         "created_on": item.created_on.isoformat() if item.created_on else None,
         "status": item.status,
+        "is_creator": item.user_id == current_user.user_id,
     } for item in rows]
 
 
