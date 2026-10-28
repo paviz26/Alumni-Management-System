@@ -47,6 +47,7 @@ def list_events(db: Session = Depends(get_db), current_user: User = Depends(get_
             "capacity": event.capacity,
             "type": event.type,
             "status": event.status,
+            "is_creator": event.created_by == current_user.user_id,
             "registration_count": registration_count,
             "is_registered": is_registered,
         })

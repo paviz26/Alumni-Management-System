@@ -18,7 +18,7 @@ backend/alembic/          Versioned PostgreSQL migrations
 backend/tests/            Isolated API tests and opt-in PostgreSQL race test
 database/                 Schema reference, sample data, queries, views, functions, triggers, roles
 docs/                     Project notes and feature specification
-frontend/src/             React application (frontend changes are outside backend scope)
+frontend/src/             React application, role-specific pages, and shared API client
 docker-compose.yml        Local PostgreSQL service
 APIS.md                   Registered backend API reference
 ```
@@ -27,7 +27,7 @@ APIS.md                   Registered backend API reference
 
 - Python 3.10 or newer.
 - PostgreSQL 14 or newer (the compose file uses PostgreSQL 16).
-- Node.js 16+ only when running the existing frontend.
+- Node.js 20.19+ or 22.12+ when running the frontend (required by the current Vite version).
 
 Backend dependency pins and ranges are in `backend/requirements.txt` (including FastAPI 0.116.1, SQLAlchemy 2.0.36, psycopg 3.3.6, Pydantic 2.13.5, and Alembic 1.x).
 
@@ -124,7 +124,7 @@ npm install
 npm run dev
 ```
 
-The Vite proxy forwards `/api` to `http://localhost:5000`. The backend returns canonical snake_case fields plus camelCase aliases and a `success` field for object responses to preserve the current React contract. Some frontend pages remain read-only or have controls that are not wired to backend operations; see `APIS.md` and the limitations below.
+The Vite proxy forwards `/api` to `http://localhost:5000`. The backend returns canonical snake_case fields plus camelCase aliases for React compatibility. The frontend supports role-aware profile, directory, event, job, mentorship, announcement, verification, and donation workflows. See [frontend/README.md](frontend/README.md) for user-facing behavior and [APIS.md](APIS.md) for the authoritative API contract.
 
 ## Backup and restore
 
@@ -157,5 +157,5 @@ Keep backups encrypted and outside the repository. Verify restores periodically 
 - No PostgreSQL server was available for applying migrations, validating SQL objects, checking grants, or executing the event race test. Those database behaviors are not reported as runtime-verified.
 - Faculty self-registration is allowed by project policy and is not institutionally verified; provision this service only where that policy is acceptable.
 - There is no payment gateway, email delivery, batch/cohort management, or full CRUD for departments/companies/users.
-- The frontend does not expose donation management or every backend operation. It also currently offers no event update form.
+- The frontend does not expose every backend operation. Event invitations have no list/RSVP flow, donations do not process payments, and employer-site applications are separate from in-app application records.
 - The SQL reference scripts and the Alembic ORM migration are aligned for the selected model, but only the migration path should be used for an existing database.

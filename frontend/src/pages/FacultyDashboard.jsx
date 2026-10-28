@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -9,6 +10,7 @@ const FacultyDashboard = () => {
   const [students, setStudents] = useState([]);
   const [alumni, setAlumni] = useState([]);
   const [mentorshipOverview, setMentorshipOverview] = useState({ active: 0, completed: 0, pending: 0 });
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,17 +19,27 @@ const FacultyDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [notifData, studentsData, alumniData, mentorshipData] = await Promise.all([
+      const [notifData, studentsData, alumniData, mentorshipData, announcementsData] = await Promise.all([
         api.get('/notifications', authToken),
         api.get('/faculty/students', authToken),
         api.get('/faculty/alumni', authToken),
         api.get('/mentorship/overview', authToken),
+        api.get('/announcements/recent', authToken),
       ]);
 
       setNotifications(Array.isArray(notifData) ? notifData : notifData?.notifications || []);
       setStudents(Array.isArray(studentsData) ? studentsData : studentsData?.students || []);
       setAlumni(Array.isArray(alumniData) ? alumniData : alumniData?.alumni || []);
       setMentorshipOverview(mentorshipData || { active: 0, completed: 0, pending: 0 });
+      setAnnouncements(Array.isArray(announcementsData) ? announcementsData.map(a => ({
+        ...a,
+        publishedAt: a.published_at || a.publishedAt,
+        createdOn: a.created_on || a.createdOn
+      })) : (announcementsData?.announcements || []).map(a => ({
+        ...a,
+        publishedAt: a.published_at || a.publishedAt,
+        createdOn: a.created_on || a.createdOn
+      })));
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -101,6 +113,36 @@ const FacultyDashboard = () => {
                   <h4>{alum.firstName} {alum.lastName}</h4>
                   <p>{alum.designation} @ {alum.companyName}</p>
                   <p>Graduated: {alum.graduationYear}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="card">
+          <h3>Recent Announcements</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <Link to="/announcements" className="btn btn-primary" style={{ fontSize: '12px', padding: '5px 10px' }}>
+              View All
+            </Link>
+            {(currentUser?.role === 'ADMIN' || currentUser?.role === 'FACULTY') && (
+              <Link to="/announcements" className="btn btn-success" style={{ fontSize: '12px', padding: '5px 10px' }}>
+                Create
+              </Link>
+            )}
+          </div>
+          {announcements.length === 0 ? (
+            <p>No recent announcements.</p>
+          ) : (
+            announcements.slice(0, 3).map((announcement) => (
+              <div key={announcement.announcementId} className="list-item">
+                <div className="list-item-info">
+                  <h4>{announcement.title}</h4>
+                  <p>{announcement.content?.substring(0, 100) || ''}{announcement.content && announcement.content.length > 100 ? '...' : ''}</p>
+                  <p className="notification-time">{new Date(announcement.publishedAt || announcement.createdOn).toLocaleDateString()}</p>
+                </div>
+                <div className="list-item-actions">
+                  <Link to={`/announcements/${announcement.announcementId}`} className="btn btn-primary">View</Link>
                 </div>
               </div>
             ))

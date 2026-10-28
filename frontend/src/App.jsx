@@ -18,6 +18,7 @@ import AchievementsPage from './pages/AchievementsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import AdminVerificationPage from './pages/AdminVerificationPage';
+import DonationPage from './pages/DonationPage';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, isAuthenticated, loading } = useAuth();
@@ -180,6 +181,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminVerificationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/donations"
+            element={
+              <ProtectedRoute allowedRoles={['ALUMNI', 'ADMIN']}>
+                <DonationPage />
               </ProtectedRoute>
             }
           />

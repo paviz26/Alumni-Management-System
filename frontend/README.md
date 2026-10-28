@@ -1,17 +1,17 @@
-# Alumni Management System - Frontend (React)
+# Alumni Management System - Frontend
 
-This is the React frontend for the Alumni Management System, migrated from vanilla HTML/CSS/JS.
+React client for the Alumni Management System. The frontend calls the FastAPI backend through Vite's `/api` proxy.
 
 ## Tech Stack
 
 - **React 19** - UI library
 - **Vite** - Build tool and dev server
 - **React Router** - Client-side routing
-- **Axios** - HTTP client (optional, using fetch API)
+- **Fetch API** - HTTP client with shared status/error handling
 
 ## Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js 20.19+ or 22.12+
 - npm or yarn
 
 ## Installation
@@ -50,43 +50,21 @@ npm run preview
 ```
 frontend/
 ├── src/
-│   ├── components/          # Reusable components
-│   │   ├── DashboardLayout.jsx
-│   │   └── Sidebar.jsx
-│   ├── context/            # React Context
-│   │   └── AuthContext.jsx
-│   ├── pages/              # Page components
-│   │   ├── LandingPage.jsx
-│   │   ├── LoginPage.jsx
-│   │   ├── RegisterPage.jsx
-│   │   ├── StudentDashboard.jsx
-│   │   ├── AlumniDashboard.jsx
-│   │   ├── FacultyDashboard.jsx
-│   │   ├── AdminDashboard.jsx
-│   │   ├── ProfilePage.jsx
-│   │   ├── DirectoryPage.jsx
-│   │   ├── EventsPage.jsx
-│   │   ├── JobsPage.jsx
-│   │   ├── MentorshipPage.jsx
-│   │   ├── ConnectionsPage.jsx
-│   │   ├── AchievementsPage.jsx
-│   │   ├── NotificationsPage.jsx
-│   │   ├── AnnouncementsPage.jsx
-│   │   └── AdminVerificationPage.jsx
-│   ├── utils/              # Utility functions
-│   │   └── api.js
-│   ├── App.jsx             # Main app component with routing
-│   ├── main.jsx            # Entry point
-│   └── index.css           # Global styles
-├── index.html              # HTML template
-├── vite.config.js          # Vite configuration
-└── package.json            # Dependencies
+│   ├── components/       # Shared layout and navigation
+│   ├── context/          # Authentication state
+│   ├── pages/            # Role-specific pages and workflows
+│   ├── utils/api.js      # Fetch wrapper and HTTP error handling
+│   ├── App.jsx           # Routes and role guards
+│   └── index.css         # Global styles
+├── index.html
+├── vite.config.js
+└── package.json
 ```
 
 ## Features
 
 - **Authentication**: Login, Register, Logout with JWT token management
-- **Role-based Access**: Different dashboards for Students, Alumni, Faculty, and Admin
+- **Role-based Access**: Different dashboards and actions for Students, Alumni, Faculty, and Admin
 - **Responsive Design**: Mobile-friendly UI
 - **API Integration**: Connected to backend via proxy at `/api`
 - **State Management**: React Context for authentication state
@@ -119,33 +97,39 @@ Authentication state is managed using React Context (`AuthContext`). The token a
 - **Alumni Dashboard**: Alumni-specific features
 - **Faculty Dashboard**: Faculty-specific features
 - **Admin Dashboard**: Admin-specific features
-- **Profile**: User profile management
-- **Directory**: Alumni directory with search
-- **Events**: Event listings and registration
-- **Jobs**: Job postings and applications
-- **Mentorship**: Mentorship program management
+- **Profile**: Alumni can edit their own profile; other roles receive an alumni-profile explanation
+- **Directory**: Alumni search filters and pagination; private contact details are not displayed
+- **Events**: Alumni registration/cancellation, faculty/admin event creation and editing, and admin approval queue
+- **Jobs**: Alumni posting management; students record in-app applications and can separately open safe employer links
+- **Mentorship**: Students discover/request/cancel; alumni respond and complete accepted relationships; faculty see department totals
 - **Connections**: Connection requests and management
 - **Achievements**: Alumni achievements
 - **Notifications**: User notifications
 - **Announcements**: System announcements
 - **Admin Verification**: Alumni verification for admins
+- **Donations**: Alumni pledge records and admin status/summary view
 
 ## Backend Integration
 
-Make sure the backend is running on `http://localhost:5000` before starting the frontend.
+Start the backend from the `backend/` directory after configuring its environment and applying migrations:
 
 ```bash
-# From the project root
 cd backend
+uvicorn app.main:app --reload --port 5000
+```
+
+Then start the frontend from `frontend/`:
+
+```bash
 npm install
 npm run dev
 ```
 
-## Migration Notes
+The frontend is served at `http://localhost:3000`. If the backend is unavailable, pages that call the API will show request errors. See the backend setup and authoritative endpoint/role documentation in [the repository README](../README.md) and [APIS.md](../APIS.md).
 
-This React application was migrated from the original HTML/CSS/JS frontend. All original functionality has been preserved:
+## Workflow boundaries
 
-- All API endpoints remain the same
-- All UI components maintain the same styling
-- Authentication flow is identical
-- Role-based access control is preserved
+- Event invitations create in-app invitation and notification records only; there is no invitation list or RSVP response flow.
+- Donation entries are pledge/recordkeeping data. Marking one completed is not proof of payment, and there is no payment integration.
+- Job applications recorded by the API are separate from any application submitted on an employer's site.
+- Public registration supports STUDENT, ALUMNI, and FACULTY; ADMIN accounts are provisioned by an administrator.

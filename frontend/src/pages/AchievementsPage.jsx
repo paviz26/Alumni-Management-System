@@ -43,7 +43,7 @@ const AchievementsPage = () => {
       }
     } catch (error) {
       console.error('Error adding achievement:', error);
-      alert('Network error. Please try again.');
+      alert(error.message || 'Failed to add achievement.');
     }
   };
 
@@ -60,7 +60,7 @@ const AchievementsPage = () => {
       }
     } catch (error) {
       console.error('Error deleting achievement:', error);
-      alert('Network error. Please try again.');
+      alert(error.message || 'Failed to delete achievement.');
     }
   };
 
