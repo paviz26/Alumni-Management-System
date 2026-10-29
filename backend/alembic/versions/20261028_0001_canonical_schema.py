@@ -70,7 +70,10 @@ def _run_sql_script(bind, path: Path) -> None:
     for statement in statements:
         statement = "\n".join(line for line in statement.splitlines() if not line.lstrip().startswith("--")).strip()
         if statement:
-            bind.exec_driver_sql(statement)
+            # psycopg parses percent signs as placeholders even when no
+            # parameters are supplied; doubled percent signs reach PostgreSQL
+            # as literal percent signs in function bodies and format strings.
+            bind.exec_driver_sql(statement.replace("%", "%%"))
 
 
 def upgrade() -> None:
@@ -84,7 +87,7 @@ def upgrade() -> None:
     bind.exec_driver_sql("DROP VIEW IF EXISTS alumni_directory, event_participation, alumni_career, job_opportunities, mentorship_directory, donation_summary, alumni_event_history, department_alumni_summary")
     bind.exec_driver_sql("DROP FUNCTION IF EXISTS get_alumni_count_by_department(INT), get_total_completed_donations(), get_event_registration_count(INT), get_alumni_donation_total(INT), get_alumni_name(INT), get_jobs_posted_by_alumni(INT)")
 
-    tables = {item["name"] for item in inspector.get_table_names()}
+    tables = set(inspector.get_table_names())
     if "mentorship" in tables:
         columns = _columns(bind, "mentorship")
         if {"mentor_id", "mentee_id"} <= columns:
@@ -92,7 +95,7 @@ def upgrade() -> None:
                 raise RuntimeError("Both mentorship and mentorship_alumni_legacy exist; reconcile them manually before migrating")
             op.rename_table("mentorship", "mentorship_alumni_legacy")
 
-    tables = {item["name"] for item in sa.inspect(bind).get_table_names()}
+    tables = set(sa.inspect(bind).get_table_names())
     if "jobs" in tables and "job_postings" in tables:
         # Keep the SQL-era rows intact while making the active runtime posting table canonical.
         if "jobs_sql_legacy" in tables:
@@ -116,7 +119,7 @@ def upgrade() -> None:
         if "company_id" not in cols:
             op.add_column("jobs", sa.Column("company_id", sa.Integer(), nullable=True))
 
-    tables = {item["name"] for item in sa.inspect(bind).get_table_names()}
+    tables = set(sa.inspect(bind).get_table_names())
     if "jobs" in tables:
         cols = _columns(bind, "jobs")
         for name, column in (
@@ -154,11 +157,24 @@ def upgrade() -> None:
             bind.exec_driver_sql("ALTER TABLE events ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'PENDING'")
     if "announcements" in tables:
         cols = _columns(bind, "announcements")
-        if "user_id" in cols and "created_by" not in cols:
-            op.alter_column("announcements", "user_id", new_column_name="created_by")
+        for legacy_name in ("user_id", "creator_id"):
+            if legacy_name in cols and "created_by" not in cols:
+                op.alter_column("announcements", legacy_name, new_column_name="created_by")
+                break
+        cols = _columns(bind, "announcements")
+        if "created_by" not in cols:
+            op.add_column("announcements", sa.Column(
+                "created_by", sa.Integer(),
+                sa.ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True,
+            ))
         cols = _columns(bind, "announcements")
         if "created_on" in cols and "published_at" not in cols:
             op.alter_column("announcements", "created_on", new_column_name="published_at")
+        elif "published_at" not in cols:
+            op.add_column("announcements", sa.Column(
+                "published_at", sa.DateTime(), nullable=False,
+                server_default=sa.func.now(),
+            ))
 
     # Create missing tables only. This does not drop or replace existing records.
     models_present = Base.metadata
